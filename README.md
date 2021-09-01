@@ -8,9 +8,9 @@
 От релизной версии он отличается файлом wot_stat/common/crypto.py, сейчас в нём расположена заглушка, релизная версия кодирует отправляемый на сервер json, дабы усложнить жизнь желающим заспамить сервер фейковыми сообщениями.
 
 ## Структура
-Задача [eventLogger](res/scripts/client/gui/mods/wot_stat/logger/eventLogger.py) -- создавать события [events](res/scripts/client/gui/mods/wot_stat/logger/events.py) и добавлять их в [battleEventSession](wotstat/res/scripts/client/gui/mods/wot_stat/logger/battleEventSession.py).
+Задача [eventLogger](WOTSTAT/res/scripts/client/gui/mods/wot_stat/logger/eventLogger.py) -- создавать события [events](WOTSTAT/res/scripts/client/gui/mods/wot_stat/logger/events.py) и добавлять их в [battleEventSession](WOTSTAT/res/scripts/client/gui/mods/wot_stat/logger/battleEventSession.py).
 
-[BattleEventSession](res/scripts/client/gui/mods/wot_stat/logger/battleEventSession.py) группирует события и раз в N=5 секунд отправляет их на сервер. Каждый бой создаётся новый экземпляр `BattleEventSession(Events.OnEndLoad())`, все события внутри этого боя отправляются через этот экземпляр. Экземпляр завершает своё существование событием `Events.OnBattleResult()`.
+[BattleEventSession](WOTSTAT/res/scripts/client/gui/mods/wot_stat/logger/battleEventSession.py) группирует события и раз в N=5 секунд отправляет их на сервер. Каждый бой создаётся новый экземпляр `BattleEventSession(Events.OnEndLoad())`, все события внутри этого боя отправляются через этот экземпляр. Экземпляр завершает своё существование событием `Events.OnBattleResult()`.
 
 Все остальные файлы служебные и не выполняют ключевой роли. 
 

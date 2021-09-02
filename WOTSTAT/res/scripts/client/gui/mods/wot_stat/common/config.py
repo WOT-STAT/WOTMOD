@@ -7,8 +7,8 @@ class Config:
     config = {}
     defaultParams = {
         'version': '1.0.0.0',
-        'initBattleURL': 'https://wotstat.soprachev.com/api/events/OnBattleStart',
-        'eventURL': 'https://wotstat.soprachev.com/api/events/send'
+        'initBattleURL': 'https://dev.wotstat.soprachev.com/api/events/OnBattleStart',
+        'eventURL': 'https://dev.wotstat.soprachev.com/api/events/send'
     }
 
     def __init__(self, ConfigPath, DefaultParams=None):

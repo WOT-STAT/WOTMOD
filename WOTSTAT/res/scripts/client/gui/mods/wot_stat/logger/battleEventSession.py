@@ -3,9 +3,14 @@ import BigWorld
 
 from events import Event, OnEndLoad, OnBattleResult
 from ..common.asyncResponse import post_async
-from ..common.cryptoPlaceholder import encrypt
 from ..utils import print_log
 
+try:
+    from ..common.crypto import encrypt
+    print_log('import crypto')
+except:
+    from ..common.cryptoPlaceholder import encrypt
+    print_log('import cryptoPlaceholder')
 
 class BattleEventSession:
     send_queue = []

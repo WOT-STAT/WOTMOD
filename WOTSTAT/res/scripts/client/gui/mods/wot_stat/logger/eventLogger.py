@@ -83,7 +83,12 @@ class EventLogger:
 
     def update_targeting_info(self, obj, turretYaw, gunPitch, maxTurretRotationSpeed, maxGunRotationSpeed,
                               shot_disp_multiplier_factor, *a):
+
         if self.battle_event_session or BattleReplay.isPlaying():
+            return
+
+        print_log('position ' + str(BigWorld.player().getOwnVehiclePosition()))
+        if not BigWorld.player().getOwnVehiclePosition():
             return
 
         print_debug("______INIT______")
@@ -93,7 +98,6 @@ class EventLogger:
 
         player.enableServerAim(True)
 
-        print_log('position ' + str(player.getOwnVehiclePosition()))
 
         onEndLoad = OnEndLoad(ArenaTag=player.arena.arenaType.geometry,
                               ArenaID=player.arenaUniqueID,

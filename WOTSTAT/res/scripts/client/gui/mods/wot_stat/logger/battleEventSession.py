@@ -22,14 +22,16 @@ class BattleEventSession:
     enable = False
 
     def __init__(self, event_URL, init_URL, on_end_load_event, sendInterval=5):
-        # type: (str, OnEndLoad, float) -> None
+        # type: (str, str, OnEndLoad, float) -> None
 
         self.eventURL = event_URL
         self.initURL = init_URL
         self.send_interval = sendInterval
         self.arenaID = on_end_load_event.ArenaID
 
-        post_async(self.initURL, encrypt(json.dumps(on_end_load_event.get_dict())), self.__init_send_callback)
+        data = json.dumps(on_end_load_event.get_dict())
+        print_log(data)
+        post_async(self.initURL, encrypt(data), self.__init_send_callback)
 
     def add_event(self, event):
         # type: (Event) -> None
@@ -64,5 +66,5 @@ class BattleEventSession:
             data = {
                 'events': map(lambda t: t.get_dict(), events)
             }
-            post_async(self.eventURL, encrypt(json.dumps(data)), callback)
             print_log(json.dumps(data))
+            post_async(self.eventURL, encrypt(json.dumps(data)), callback)

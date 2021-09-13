@@ -7,6 +7,8 @@ from vehicle_systems.tankStructure import TankPartNames
 from Math import Matrix, Vector3
 from PlayerEvents import g_playerEvents
 from functools import partial
+from constants import ARENA_PERIOD, ARENA_PERIOD_NAMES, ARENA_GAMEPLAY_NAMES, AUTH_REALM
+
 
 from events import OnEndLoad, OnShot, OnBattleResult
 from battleEventSession import BattleEventSession
@@ -21,6 +23,7 @@ class EventLogger:
     old_battle_event_sessions = {}
     battle_event_session = None  # type: BattleEventSession
     player = None  # type: BigWorld.player()
+    battle_loaded = False
 
     temp_shot = OnShot()
     shots = {
@@ -35,12 +38,19 @@ class EventLogger:
         'clientDisp': None
     }
 
+    times = {
+        'start_battle_time': 0,
+        'on_enter_world_time': 0,
+        'on_end_load_time': 0
+    }
+
     def __init__(self):
 
         wotHookEvents.add_listener('PlayerAvatar.enableServerAim', self.on_enable_server_aim)
 
         wotHookEvents.add_listener('PlayerAvatar.onEnterWorld', self.on_enter_world_wot)
         wotHookEvents.add_listener('PlayerAvatar.updateTargetingInfo', self.update_targeting_info)
+        wotHookEvents.add_listener('PlayerAvatar.onArenaPeriodChange', self.onArenaPeriodChange)
 
         wotHookEvents.add_listener('VehicleGunRotator.updateGunMarker', self.update_gun_marker_client)
         wotHookEvents.add_listener('VehicleGunRotator.setShotPosition', self.update_gun_marker_server)
@@ -61,6 +71,7 @@ class EventLogger:
         wotHookEvents.remove_listener('PlayerAvatar.enableServerAim', self.on_enable_server_aim)
         wotHookEvents.remove_listener('PlayerAvatar.onEnterWorld', self.on_enter_world_wot)
         wotHookEvents.remove_listener('PlayerAvatar.updateTargetingInfo', self.update_targeting_info)
+        wotHookEvents.remove_listener('PlayerAvatar.onArenaPeriodChange', self.onArenaPeriodChange)
         wotHookEvents.remove_listener('VehicleGunRotator.updateGunMarker', self.update_gun_marker_client)
         wotHookEvents.remove_listener('VehicleGunRotator.setShotPosition', self.update_gun_marker_server)
         wotHookEvents.remove_listener('PlayerAvatar.shoot', self.shoot)
@@ -80,6 +91,8 @@ class EventLogger:
             self.old_battle_event_sessions[self.battle_event_session.arenaID] = self.battle_event_session
 
         self.battle_event_session = None
+        self.battle_loaded = False
+        self.times['on_enter_world_time'] = BigWorld.serverTime()
 
     def update_targeting_info(self, obj, turretYaw, gunPitch, maxTurretRotationSpeed, maxGunRotationSpeed,
                               shot_disp_multiplier_factor, *a):
@@ -87,21 +100,26 @@ class EventLogger:
         if self.battle_event_session or BattleReplay.isPlaying():
             return
 
-        print_log('position ' + str(BigWorld.player().getOwnVehiclePosition()))
-        if not BigWorld.player().getOwnVehiclePosition():
+        if not hasattr(BigWorld.player(), 'arena') or not BigWorld.player().getOwnVehiclePosition():
+            return
+
+        if not self.battle_loaded:
+            print_debug("______OnEndLoad______")
+            self.battle_loaded = True
+            self.times['on_end_load_time'] = BigWorld.serverTime()
+
+        if BigWorld.player().arena.period not in [ARENA_PERIOD.PREBATTLE, ARENA_PERIOD.BATTLE]:
             return
 
         print_debug("______INIT______")
 
-        self.player = BigWorld.player()
-        player = self.player
+        player = BigWorld.player()
+        self.player = player
 
         player.enableServerAim(True)
-
-
         onEndLoad = OnEndLoad(ArenaTag=player.arena.arenaType.geometry,
                               ArenaID=player.arenaUniqueID,
-                              Team=None, #TODO
+                              Team=player.team,
                               PlayerName=player.name,
                               PlayerBDID=player.arena.vehicles[player.playerVehicleID]['accountDBID'],
                               PlayerClan=player.arena.vehicles[player.playerVehicleID]['clanAbbrev'],
@@ -111,13 +129,23 @@ class EventLogger:
                               GunTag=player.vehicleTypeDescriptor.gun.name,
                               StartDis=player.vehicleTypeDescriptor.gun.shotDispersionAngle * shot_disp_multiplier_factor,
                               SpawnPoint=vector(player.getOwnVehiclePosition()),
-                              TimerToStart=0, #TODO
                               BattleMode=arenaTags[player.arena.bonusType],
+                              BattleGameplay=ARENA_GAMEPLAY_NAMES[player.arenaTypeID >> 16],
                               GameVersion=readClientServerVersion()[1],
-                              ModVersion=config.get('version')
+                              ServerName=player.connectionMgr.serverUserName,
+                              Region=AUTH_REALM,
+                              ModVersion=config.get('version'),
+                              BattlePeriod=ARENA_PERIOD_NAMES[player.arena.period],
+                              BattleTime=self.__battle_time(),
+                              BattleLoadTime=self.times['on_end_load_time'] - self.times['on_enter_world_time'],
+                              PreBattleWaitTime=BigWorld.serverTime() - self.times['on_end_load_time']
                               )
         self.battle_event_session = BattleEventSession(config.get('eventURL'), config.get('initBattleURL'), onEndLoad)
         self.arenas_id_wait_battle_result.append(player.arenaUniqueID)
+
+    def onArenaPeriodChange(self, obj, period, periodEndTime, periodLength, periodAdditionalInfo):
+        if period is ARENA_PERIOD.BATTLE:
+            self.times['start_battle_time'] = periodEndTime - periodLength
 
     def update_gun_marker_server(self, obj, vehicleID, shotPos, shotVec, dispersionAngle, *a, **k):
         self.marker['serverPos'] = obj._VehicleGunRotator__getGunMarkerPosition(
@@ -136,6 +164,7 @@ class EventLogger:
         if not can_shoot:
             return
 
+        self.temp_shot.set_battle_time(self.__battle_time())
         self.temp_shot.set_date()
         self.temp_shot.set_server_marker(vector(self.marker['serverPos']), self.marker['serverDisp'])
         self.temp_shot.set_client_marker(vector(self.marker['clientPos']), self.marker['clientDisp'])
@@ -268,6 +297,19 @@ class EventLogger:
 
 
 
+    def __battle_time(self):
+        player = BigWorld.player()
+
+        if not hasattr(player, 'arena'):
+            return -10003
+
+        return {
+            ARENA_PERIOD.IDLE: -10001,
+            ARENA_PERIOD.WAITING: -10000,
+            ARENA_PERIOD.PREBATTLE: BigWorld.serverTime() - player.arena.periodEndTime,
+            ARENA_PERIOD.BATTLE: BigWorld.serverTime() - self.times['start_battle_time'],
+            ARENA_PERIOD.AFTERBATTLE: BigWorld.serverTime() - self.times['start_battle_time']
+        }.get(player.arena.period, -10002)
 
     def __own_effect_index(self):
         return map(lambda t: t.shell.effectsIndex, self.player.vehicleTypeDescriptor.gun.shots)

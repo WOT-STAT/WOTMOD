@@ -41,8 +41,11 @@ def onEnterWorld(self, *a, **k):
 
 @g_overrideLib.registerEvent(PlayerAvatar, 'updateTargetingInfo')
 def updateTargetingInfo(self, *a, **k):
-    wotHookEvents.invoke('PlayerAvatar.updateTargetingInfo', self, *a, **k)
+    wotHookEvents.invoke('PlayerAvatar.updateTargetingInfo', self, *a, **k)\
 
+@g_overrideLib.registerEvent(PlayerAvatar, '_PlayerAvatar__onArenaPeriodChange')
+def onArenaPeriodChange(self, *a, **k):
+    wotHookEvents.invoke('PlayerAvatar.onArenaPeriodChange', self, *a, **k)
 
 # -------------------MOVE------------------#
 

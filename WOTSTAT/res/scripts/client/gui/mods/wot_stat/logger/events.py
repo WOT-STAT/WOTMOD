@@ -16,7 +16,8 @@ class Event:
 class OnEndLoad(Event):
 
     def __init__(self, ArenaTag, ArenaID, Team, PlayerName, PlayerBDID, PlayerClan, TankTag, TankType, TankLevel,
-                 GunTag, StartDis, SpawnPoint, TimerToStart, BattleMode, GameVersion, ModVersion):
+                 GunTag, StartDis, SpawnPoint, BattleMode, BattleGameplay, GameVersion, ServerName, Region, ModVersion,
+                 BattlePeriod, BattleTime, BattleLoadTime, PreBattleWaitTime):
         Event.__init__(self, 'OnEndLoad')
 
         self.ArenaTag = ArenaTag
@@ -31,11 +32,16 @@ class OnEndLoad(Event):
         self.GunTag = GunTag
         self.StartDis = StartDis
         self.SpawnPoint = SpawnPoint
-        self.TimerToStart = TimerToStart
         self.BattleMode = BattleMode
+        self.BattleGameplay = BattleGameplay
         self.GameVersion = GameVersion
+        self.ServerName = ServerName
+        self.Region = Region
         self.ModVersion = ModVersion
-
+        self.BattlePeriod = BattlePeriod
+        self.BattleTime = BattleTime
+        self.LoadTime = BattleLoadTime
+        self.PreBattleWaitTime = PreBattleWaitTime
 
 # Жизненный цикл события OnShot:
 # 1. На PlayerAvatar.shoot устанавливает состояние маркера и состояние текущего снаряда "на момент перед выстрелом" (set_client_marker, set_server_marker, set_shoot)
@@ -45,12 +51,13 @@ class OnEndLoad(Event):
 # 4. На ProjectileMover.killProjectile событие сформировано (set_tracer_end)
 class OnShot(Event):
 
-    def __init__(self, ServerMarkerPoint=None, ClientMarkerPoint=None, ServerShotDispersion=None,
+    def __init__(self, BattleTime=None, ServerMarkerPoint=None, ClientMarkerPoint=None, ServerShotDispersion=None,
                  ClientShotDispersion=None, ShotID=None, GunPoint=None, BattleDispersion=None, GunDispersion=None,
                  ShellTag=None, Ping=None, ServerAim=None, AutoAim=None, TracerStart=None, TracerEnd=None,
                  TracerVel=None, Gravity=None, HitPoint=None, HitReason=None):
         Event.__init__(self, 'OnShot')
 
+        self.BattleTime = BattleTime
         self.ServerMarkerPoint = ServerMarkerPoint
         self.ClientMarkerPoint = ClientMarkerPoint
         self.ServerShotDispersion = ServerShotDispersion
@@ -122,6 +129,9 @@ class OnShot(Event):
             self.Date = date
         else:
             self.Date = get_current_date()
+
+    def set_battle_time(self, time):
+        self.BattleTime = time
 
 #TODO: Декодировать больше результатов
 class OnBattleResult(Event):

@@ -31,6 +31,10 @@ class EventLogger:
         'shots': dict()
     }
 
+    targeting_info = {
+        'shot_disp_multiplier_factor': 0
+    }
+
     marker = {
         'serverPos': None,
         'serverDisp': None,
@@ -93,30 +97,23 @@ class EventLogger:
         self.battle_event_session = None
         self.battle_loaded = False
         self.times['on_enter_world_time'] = BigWorld.serverTime()
+        self.player = BigWorld.player()
 
-    def update_targeting_info(self, obj, turretYaw, gunPitch, maxTurretRotationSpeed, maxGunRotationSpeed,
-                              shot_disp_multiplier_factor, *a):
+    def init_battle_session(self):
 
-        if self.battle_event_session or BattleReplay.isPlaying():
-            return
-
-        if not hasattr(BigWorld.player(), 'arena') or not BigWorld.player().getOwnVehiclePosition():
-            return
-
-        if not self.battle_loaded:
-            print_debug("______OnEndLoad______")
-            self.battle_loaded = True
-            self.times['on_end_load_time'] = BigWorld.serverTime()
-
-        if BigWorld.player().arena.period not in [ARENA_PERIOD.PREBATTLE, ARENA_PERIOD.BATTLE]:
+        if self.battle_event_session or not self.battle_loaded:
             return
 
         print_debug("______INIT______")
 
         player = BigWorld.player()
-        self.player = player
+
+        self.times['start_battle_time'] = player.arena.periodEndTime \
+            if player.arena.period is ARENA_PERIOD.PREBATTLE \
+            else player.arena.periodEndTime - player.arena.periodLength
 
         player.enableServerAim(True)
+        print(self.times)
         onEndLoad = OnEndLoad(ArenaTag=player.arena.arenaType.geometry,
                               ArenaID=player.arenaUniqueID,
                               Team=player.team,
@@ -127,7 +124,7 @@ class EventLogger:
                               TankType=short_tank_type(get_tank_type(player.vehicleTypeDescriptor.type.tags)),
                               TankLevel=player.vehicleTypeDescriptor.level,
                               GunTag=player.vehicleTypeDescriptor.gun.name,
-                              StartDis=player.vehicleTypeDescriptor.gun.shotDispersionAngle * shot_disp_multiplier_factor,
+                              StartDis=player.vehicleTypeDescriptor.gun.shotDispersionAngle * self.targeting_info['shot_disp_multiplier_factor'],
                               SpawnPoint=vector(player.getOwnVehiclePosition()),
                               BattleMode=arenaTags[player.arena.bonusType],
                               BattleGameplay=ARENA_GAMEPLAY_NAMES[player.arenaTypeID >> 16],
@@ -137,13 +134,35 @@ class EventLogger:
                               ModVersion=config.get('version'),
                               BattlePeriod=ARENA_PERIOD_NAMES[player.arena.period],
                               BattleTime=self.__battle_time(),
-                              BattleLoadTime=self.times['on_end_load_time'] - self.times['on_enter_world_time'],
+                              LoadTime=self.times['on_end_load_time'] - self.times['on_enter_world_time'],
                               PreBattleWaitTime=BigWorld.serverTime() - self.times['on_end_load_time']
                               )
         self.battle_event_session = BattleEventSession(config.get('eventURL'), config.get('initBattleURL'), onEndLoad)
         self.arenas_id_wait_battle_result.append(player.arenaUniqueID)
 
+    def update_targeting_info(self, obj, turretYaw, gunPitch, maxTurretRotationSpeed, maxGunRotationSpeed,
+                              shot_disp_multiplier_factor, *a):
+
+        if self.battle_event_session or BattleReplay.isPlaying():
+            return
+
+        if not hasattr(BigWorld.player(), 'arena') or not BigWorld.player().getOwnVehiclePosition():
+            return
+
+        if self.battle_loaded:
+            return
+
+        print_debug("______OnEndLoad______")
+        self.battle_loaded = True
+        self.times['on_end_load_time'] = BigWorld.serverTime()
+        self.targeting_info['shot_disp_multiplier_factor'] = shot_disp_multiplier_factor
+
+        if BigWorld.player().arena.period in [ARENA_PERIOD.PREBATTLE, ARENA_PERIOD.BATTLE]:
+            self.init_battle_session()
+
     def onArenaPeriodChange(self, obj, period, periodEndTime, periodLength, periodAdditionalInfo):
+        if period is ARENA_PERIOD.PREBATTLE:
+            self.init_battle_session()
         if period is ARENA_PERIOD.BATTLE:
             self.times['start_battle_time'] = periodEndTime - periodLength
 

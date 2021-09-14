@@ -17,7 +17,7 @@ class OnEndLoad(Event):
 
     def __init__(self, ArenaTag, ArenaID, Team, PlayerName, PlayerBDID, PlayerClan, TankTag, TankType, TankLevel,
                  GunTag, StartDis, SpawnPoint, BattleMode, BattleGameplay, GameVersion, ServerName, Region, ModVersion,
-                 BattlePeriod, BattleTime, BattleLoadTime, PreBattleWaitTime):
+                 BattlePeriod, BattleTime, LoadTime, PreBattleWaitTime):
         Event.__init__(self, 'OnEndLoad')
 
         self.ArenaTag = ArenaTag
@@ -40,7 +40,7 @@ class OnEndLoad(Event):
         self.ModVersion = ModVersion
         self.BattlePeriod = BattlePeriod
         self.BattleTime = BattleTime
-        self.LoadTime = BattleLoadTime
+        self.LoadTime = LoadTime
         self.PreBattleWaitTime = PreBattleWaitTime
 
 # Жизненный цикл события OnShot:

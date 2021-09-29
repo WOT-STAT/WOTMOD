@@ -8,18 +8,19 @@
 От релизной версии он отличается файлом wot_stat/common/crypto.py, сейчас в нём расположена заглушка, релизная версия кодирует отправляемый на сервер json, дабы усложнить жизнь желающим заспамить сервер фейковыми сообщениями.
 
 ## Структура
-Задача [eventLogger](WOTSTAT/res/scripts/client/gui/mods/wot_stat/logger/eventLogger.py) -- создавать события [events](WOTSTAT/res/scripts/client/gui/mods/wot_stat/logger/events.py) и добавлять их в [battleEventSession](WOTSTAT/res/scripts/client/gui/mods/wot_stat/logger/battleEventSession.py).
+[Логгеры](WOTSTAT/res/scripts/client/gui/mods/wot_stat/logger/loggers) создают события [events](WOTSTAT/res/scripts/client/gui/mods/wot_stat/logger/events.py) и добавляют их в [eventLogger](WOTSTAT/res/scripts/client/gui/mods/wot_stat/logger/eventLogger.py), который хранит и добавляет в нужную игровую сессию [battleEventSession](WOTSTAT/res/scripts/client/gui/mods/wot_stat/logger/battleEventSession.py) это событие.
+
 
 [BattleEventSession](WOTSTAT/res/scripts/client/gui/mods/wot_stat/logger/battleEventSession.py) группирует события и раз в N=5 секунд отправляет их на сервер. Каждый бой создаётся новый экземпляр `BattleEventSession(Events.OnEndLoad())`, все события внутри этого боя отправляются через этот экземпляр. Экземпляр завершает своё существование событием `Events.OnBattleResult()`.
 
 Все остальные файлы служебные и не выполняют ключевой роли. 
 
 ## События
-| Событие         | Статус |  Описание                                 |
-|----------       |:------:|:------                                    | 
-| OnBattleStart   | &#9745;| Начало боя                                |  
-| OnShot          | &#9745;| Факт совершения выстрела                  |
-| OnBattleResult  | &#9745;| Результат боя                             |
+| Событие        | Статус  | Описание                 |
+| -------------- | :-----: | :----------------------- |
+| OnBattleStart  | &#9745; | Начало боя               |
+| OnShot         | &#9745; | Факт совершения выстрела |
+| OnBattleResult | &#9745; | Результат боя            |
 
 
 ## Тестовый сервер

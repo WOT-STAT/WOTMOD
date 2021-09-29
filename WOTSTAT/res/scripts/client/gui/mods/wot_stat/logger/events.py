@@ -13,12 +13,12 @@ class Event:
         return self.__dict__
 
 
-class OnEndLoad(Event):
+class OnBattleStart(Event):
 
     def __init__(self, ArenaTag, ArenaID, Team, PlayerName, PlayerBDID, PlayerClan, TankTag, TankType, TankLevel,
                  GunTag, StartDis, SpawnPoint, BattleMode, BattleGameplay, GameVersion, ServerName, Region, ModVersion,
                  BattlePeriod, BattleTime, LoadTime, PreBattleWaitTime):
-        Event.__init__(self, 'OnEndLoad')
+        Event.__init__(self, 'OnBattleStart')
 
         self.ArenaTag = ArenaTag
         self.ArenaID = ArenaID
@@ -43,6 +43,7 @@ class OnEndLoad(Event):
         self.LoadTime = LoadTime
         self.PreBattleWaitTime = PreBattleWaitTime
 
+
 # Жизненный цикл события OnShot:
 # 1. На PlayerAvatar.shoot устанавливает состояние маркера и состояние текущего снаряда "на момент перед выстрелом" (set_client_marker, set_server_marker, set_shoot)
 # 2. На PlayerAvatar.showTracer устаналивается состояние трассера (set_tracer)
@@ -54,7 +55,8 @@ class OnShot(Event):
     def __init__(self, BattleTime=None, ServerMarkerPoint=None, ClientMarkerPoint=None, ServerShotDispersion=None,
                  ClientShotDispersion=None, ShotID=None, GunPoint=None, BattleDispersion=None, GunDispersion=None,
                  ShellTag=None, Ping=None, ServerAim=None, AutoAim=None, TracerStart=None, TracerEnd=None,
-                 TracerVel=None, Gravity=None, HitPoint=None, HitReason=None):
+                 TracerVel=None, Gravity=None, HitPoint=None, HitReason=None, ShellName=None, ShellDamage=None,
+                 ShellCaliber=None, ShellPiercingPower=None, ShellSpeed=None, ShellMaxDistance=None):
         Event.__init__(self, 'OnShot')
 
         self.BattleTime = BattleTime
@@ -68,6 +70,12 @@ class OnShot(Event):
         self.BattleDispersion = BattleDispersion
         self.GunDispersion = GunDispersion
         self.ShellTag = ShellTag
+        self.ShellName = ShellName
+        self.ShellDamage = ShellDamage
+        self.ShellCaliber = ShellCaliber
+        self.ShellPiercingPower = ShellPiercingPower
+        self.ShellSpeed = ShellSpeed
+        self.ShellMaxDistance = ShellMaxDistance
         self.Ping = Ping
         self.ServerAim = ServerAim
         self.AutoAim = AutoAim
@@ -92,12 +100,18 @@ class OnShot(Event):
 
         return self
 
-    def set_shoot(self, gun_position, battle_dispersion, shot_dispersion, shell_name, shell_tag, ping,
-                  auto_aim, server_aim):
+    def set_shoot(self, gun_position, battle_dispersion, shot_dispersion, shell_name, shell_tag, damage, caliber,
+                  piercingPower, speed, maxDistance, ping, auto_aim, server_aim):
         self.GunPoint = gun_position
         self.BattleDispersion = battle_dispersion
         self.GunDispersion = shot_dispersion
         self.ShellTag = shell_tag
+        self.ShellName = shell_name
+        self.ShellDamage = damage
+        self.ShellCaliber = caliber
+        self.ShellPiercingPower = piercingPower
+        self.ShellSpeed = speed
+        self.ShellMaxDistance = maxDistance
 
         self.Ping = ping
         self.AutoAim = auto_aim
@@ -133,7 +147,8 @@ class OnShot(Event):
     def set_battle_time(self, time):
         self.BattleTime = time
 
-#TODO: Декодировать больше результатов
+
+# TODO: Декодировать больше результатов
 class OnBattleResult(Event):
     def __init__(self, RAW=None, Result=None, Credits=None, XP=None, Duration=None, BotsCount=None):
         Event.__init__(self, 'OnBattleResult')

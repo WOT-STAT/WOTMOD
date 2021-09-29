@@ -1,7 +1,7 @@
 import json
 import BigWorld
 
-from events import Event, OnEndLoad, OnBattleResult
+from events import Event, OnBattleStart, OnBattleResult
 from ..common.asyncResponse import post_async
 from ..utils import print_log
 
@@ -22,7 +22,7 @@ class BattleEventSession:
     enable = False
 
     def __init__(self, event_URL, init_URL, on_end_load_event, sendInterval=5):
-        # type: (str, str, OnEndLoad, float) -> None
+        # type: (str, str, OnBattleStart, float) -> None
 
         self.eventURL = event_URL
         self.initURL = init_URL

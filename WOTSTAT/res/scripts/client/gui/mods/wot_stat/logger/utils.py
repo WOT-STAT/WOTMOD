@@ -1,9 +1,19 @@
 import BigWorld
 
 from constants import ARENA_BONUS_TYPE
+from vehicle_systems.tankStructure import TankPartNames
 
 
 def vector(t): return {'x': t.x, 'y': t.y, 'z': t.z} if t else None
+
+
+def own_gun_position(player=BigWorld.player()):
+    if player.vehicle and player.vehicle.isStarted and player.vehicle.appearance:
+        return player.vehicle.appearance.compoundModel.node(TankPartNames.GUN).position
+    else:
+        return player.getOwnVehiclePosition() + \
+               player.vehicleTypeDescriptor.hull.turretPositions[0] + \
+               player.vehicleTypeDescriptor.turret.gunPosition
 
 
 arenaTags = dict(
@@ -30,4 +40,3 @@ def get_tank_type(vehicleTags):
         else 'lightTank' if 'lightTank' in tags \
         else 'None'
     return res
-

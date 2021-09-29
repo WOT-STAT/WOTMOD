@@ -9,10 +9,8 @@ from utils import print_log
 
 configPath = './mods/configs/wot_stat/config.cfg'
 config = Config(configPath)  # type: Config
-from .logger.eventLogger import EventLogger
+from .logger.eventLogger import eventLogger
 
-
-logger = None
 
 
 def mod_name_version(version):
@@ -36,7 +34,5 @@ def init_mod():
                            '[WotStat] успешно обновлён до версии ' + t +
                            '. После перезапуска игры обновление будет применено',
                            type=SystemMessages.SM_TYPE.Warning))
-
-    logger = EventLogger()
 
 

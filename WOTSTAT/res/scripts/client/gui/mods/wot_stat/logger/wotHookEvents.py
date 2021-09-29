@@ -4,29 +4,31 @@ from Avatar import PlayerAvatar
 from VehicleGunRotator import VehicleGunRotator
 from ProjectileMover import ProjectileMover
 from Vehicle import Vehicle
+import Event
 
 from ..common.hook import g_overrideLib
 
 
 class WotHookEvents:
-    listeners = {}
-
     def __init__(self):
         self.listeners = {}
-
-    def add_listener(self, name, callback):
-        if name not in self.listeners:
-            self.listeners[name] = []
-        self.listeners[name].append(callback)
-
-    def remove_listener(self, name, callback):
-        if name in self.listeners:
-            self.listeners = filter(lambda t: t != callback, self.listeners)
-
-    def invoke(self, name, obj, *a, **k):
-        if name in self.listeners:
-            for f in self.listeners[name]:
-                f(obj, *a, **k)
+        # ------------------INIT------------------#
+        self.PlayerAvatar_onEnterWorld = Event.Event()
+        self.PlayerAvatar_updateTargetingInfo = Event.Event()
+        self.PlayerAvatar_onArenaPeriodChange = Event.Event()
+        # -------------------MOVE------------------#
+        self.VehicleGunRotator_setShotPosition = Event.Event()
+        self.VehicleGunRotator_updateGunMarker = Event.Event()
+        # -------------------SHOT------------------#
+        self.PlayerAvatar_shoot = Event.Event()
+        self.PlayerAvatar_showTracer = Event.Event()
+        # -------------------EXPLOSION------------------#
+        self.PlayerAvatar_explodeProjectile = Event.Event()
+        self.Vehicle_showDamageFromShot = Event.Event()
+        # -------------------PROJECTILE-------------------#
+        self.ProjectileMover_killProjectile = Event.Event()
+        # -------------------HELP-------------------#
+        self.PlayerAvatar_enableServerAim = Event.Event()
 
 
 wotHookEvents = WotHookEvents()
@@ -36,62 +38,61 @@ wotHookEvents = WotHookEvents()
 
 @g_overrideLib.registerEvent(PlayerAvatar, 'onEnterWorld')
 def onEnterWorld(self, *a, **k):
-    wotHookEvents.invoke('PlayerAvatar.onEnterWorld', self, *a, **k)
-
+    wotHookEvents.PlayerAvatar_onEnterWorld(self, *a, **k)
 
 @g_overrideLib.registerEvent(PlayerAvatar, 'updateTargetingInfo')
 def updateTargetingInfo(self, *a, **k):
-    wotHookEvents.invoke('PlayerAvatar.updateTargetingInfo', self, *a, **k)
+    wotHookEvents.PlayerAvatar_updateTargetingInfo(self, *a, **k)
 
 @g_overrideLib.registerEvent(PlayerAvatar, '_PlayerAvatar__onArenaPeriodChange')
 def onArenaPeriodChange(self, *a, **k):
-    wotHookEvents.invoke('PlayerAvatar.onArenaPeriodChange', self, *a, **k)
+    wotHookEvents.PlayerAvatar_onArenaPeriodChange(self, *a, **k)
 
 # -------------------MOVE------------------#
 
 @g_overrideLib.registerEvent(VehicleGunRotator, 'setShotPosition')
 def setShotPosition(self, *a, **k):
-    wotHookEvents.invoke('VehicleGunRotator.setShotPosition', self, *a, **k)
+    wotHookEvents.VehicleGunRotator_setShotPosition(self, *a, **k)
 
 
 @g_overrideLib.registerEvent(VehicleGunRotator, '_VehicleGunRotator__updateGunMarker')
 def updateGunMarker(self, *a, **k):
-    wotHookEvents.invoke('VehicleGunRotator.updateGunMarker', self, *a, **k)
+    wotHookEvents.VehicleGunRotator_updateGunMarker(self, *a, **k)
 
 
 # -------------------SHOT------------------#
 
 @g_overrideLib.registerEvent(PlayerAvatar, 'shoot')
 def shoot(self, *a, **k):
-    wotHookEvents.invoke('PlayerAvatar.shoot', self, *a, **k)
+    wotHookEvents.PlayerAvatar_shoot(self, *a, **k)
 
 
 @g_overrideLib.registerEvent(PlayerAvatar, 'showTracer')
 def showTracer(self, *a, **k):
-    wotHookEvents.invoke('PlayerAvatar.showTracer', self, *a, **k)
+    wotHookEvents.PlayerAvatar_showTracer(self, *a, **k)
 
 
 # -------------------EXPLOSION------------------#
 
 @g_overrideLib.registerEvent(PlayerAvatar, 'explodeProjectile')
 def explodeProjectile(self, *a, **k):
-    wotHookEvents.invoke('PlayerAvatar.explodeProjectile', self, *a, **k)
+    wotHookEvents.PlayerAvatar_explodeProjectile(self, *a, **k)
 
 
 @g_overrideLib.registerEvent(Vehicle, 'showDamageFromShot')
 def showDamageFromShot(self, *a, **k):
-    wotHookEvents.invoke('Vehicle.showDamageFromShot', self, *a, **k)
+    wotHookEvents.Vehicle_showDamageFromShot(self, *a, **k)
 
 # -------------------PROJECTILE-------------------#
 
 @g_overrideLib.registerEvent(ProjectileMover, '_ProjectileMover__killProjectile')
 def killProjectile(self, *a, **k):
-    wotHookEvents.invoke('ProjectileMover.killProjectile', self, *a, **k)
+    wotHookEvents.ProjectileMover_killProjectile(self, *a, **k)
 
 
 # -------------------HELP-------------------#
 
 @g_overrideLib.registerEvent(PlayerAvatar, 'enableServerAim')
 def enableServerAim(self, *a, **k):
-    wotHookEvents.invoke('PlayerAvatar.enableServerAim', self, *a, **k)
+    wotHookEvents.PlayerAvatar_enableServerAim(self, *a, **k)
 

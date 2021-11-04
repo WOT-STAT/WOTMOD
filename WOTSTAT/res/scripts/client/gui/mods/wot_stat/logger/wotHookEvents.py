@@ -22,6 +22,8 @@ class WotHookEvents:
         # -------------------SHOT------------------#
         self.PlayerAvatar_shoot = Event.Event()
         self.PlayerAvatar_showTracer = Event.Event()
+        self.PlayerAvatar_showShotResults = Event.Event()
+        self.Vehicle_onHealthChanged = Event.Event()
         # -------------------EXPLOSION------------------#
         self.PlayerAvatar_explodeProjectile = Event.Event()
         self.Vehicle_showDamageFromShot = Event.Event()
@@ -70,6 +72,14 @@ def shoot(self, *a, **k):
 @g_overrideLib.registerEvent(PlayerAvatar, 'showTracer')
 def showTracer(self, *a, **k):
     wotHookEvents.PlayerAvatar_showTracer(self, *a, **k)
+
+@g_overrideLib.registerEvent(PlayerAvatar, 'showShotResults')
+def showShotResults(self, *a, **k):
+    wotHookEvents.PlayerAvatar_showShotResults(self, *a, **k)
+
+@g_overrideLib.registerEvent(Vehicle, 'onHealthChanged')
+def onHealthChanged(self, *a, **k):
+   wotHookEvents.Vehicle_onHealthChanged(self, *a, **k)
 
 
 # -------------------EXPLOSION------------------#

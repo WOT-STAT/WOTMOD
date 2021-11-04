@@ -14,7 +14,7 @@ from .logger.eventLogger import eventLogger
 
 
 def mod_name_version(version):
-    return 'mod.wotStat_' + version + '.wotmod'
+    return 'wotStat_' + version + '.wotmod'
 
 
 def mod_name():

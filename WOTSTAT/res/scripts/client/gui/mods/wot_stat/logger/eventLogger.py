@@ -1,39 +1,31 @@
 # coding=utf-8
-import BigWorld
-import BattleReplay
-import Event
-from account_shared import readClientServerVersion
-from VehicleEffects import DamageFromShotDecoder
-from vehicle_systems.tankStructure import TankPartNames
-from Math import Matrix, Vector3
-from PlayerEvents import g_playerEvents
-from functools import partial
-from constants import ARENA_PERIOD, ARENA_PERIOD_NAMES, ARENA_GAMEPLAY_NAMES, AUTH_REALM, SERVER_TICK_LENGTH
 
-from events import OnBattleStart, OnShot, OnBattleResult
+import Event as BigWorldEvent
+from constants import ARENA_PERIOD
+
 from battleEventSession import BattleEventSession
-from wotHookEvents import wotHookEvents
 from ..load_mod import config
 from ..utils import print_log, print_debug
 from .utils import *
+from events import Event
 
 class EventLogger:
     old_battle_event_sessions = {}
     battle_event_session = None  # type: BattleEventSession
     start_battle_time = 0
-    on_session_created = Event.Event()
+    on_session_created = BigWorldEvent.Event()
 
     def __init__(self):
         print_debug('INIT EVENT LOGGER')
 
     def emit_event(self, event, arena_id=None):
-        if event.EventName == 'OnBattleStart':
+        if event.EventName == Event.NAMES.ON_BATTLE_START:
             if self.battle_event_session:
                 self.old_battle_event_sessions[self.battle_event_session.arenaID] = self.battle_event_session
             self.battle_event_session = BattleEventSession(config.get('eventURL'), config.get('initBattleURL'), event)
             self.on_session_created(self.battle_event_session)
 
-        elif event.EventName == 'OnBattleResult':
+        elif event.EventName == Event.NAMES.ON_BATTLE_RESULT:
             event_session = None
             if self.battle_event_session.arenaID == arena_id:
                 event_session = self.battle_event_session

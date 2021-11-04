@@ -1,7 +1,7 @@
 import BigWorld
 
 def print_log(log):
-    print("[MOD_WOT_STAT]: %s" % str(log))
+    print("%s [MOD_WOT_STAT]: %s" % (BigWorld.serverTime(), str(log)))
 
 def print_debug(log):
-    print("[MOD_WOT_STAT DEBUG]: %s" % str(log))
+    print("%s [MOD_WOT_STAT DEBUG]: %s" % (BigWorld.serverTime(), str(log)))

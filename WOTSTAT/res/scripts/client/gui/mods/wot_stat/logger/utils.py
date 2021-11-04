@@ -1,6 +1,8 @@
 import BigWorld
+from BattleFeedbackCommon import BATTLE_EVENT_TYPE
 
 from constants import ARENA_BONUS_TYPE
+from gui.battle_control.battle_constants import FEEDBACK_EVENT_ID
 from vehicle_systems.tankStructure import TankPartNames
 
 
@@ -16,9 +18,11 @@ def own_gun_position(player=BigWorld.player()):
                player.vehicleTypeDescriptor.turret.gunPosition
 
 
-arenaTags = dict(
+ARENA_TAGS = dict(
     [(v, k) for k, v in ARENA_BONUS_TYPE.__dict__.iteritems() if isinstance(v, int)])
 
+FEEDBACK_EVENT = dict([(v, k) for k, v in FEEDBACK_EVENT_ID.__dict__.iteritems() if isinstance(v, int)])
+BATTLE_EVENT = dict([(v, k) for k, v in BATTLE_EVENT_TYPE.__dict__.iteritems() if isinstance(v, int)])
 
 def short_tank_type(tag):
     tags = {

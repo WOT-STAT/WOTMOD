@@ -38,6 +38,7 @@ class ShotEventCollector:
             self.damages = []
             self.shot_results = []
             self.fire_damages = dict()
+            self.hit_extra = None
             self.direct_hit_point = None
             self.terrain_hit_point = None
             self.hide_tracer_point = None
@@ -59,7 +60,7 @@ class ShotEventCollector:
             elif event.type == ShotEventCollector.Event.SHOT_DAMAGE:
                 res = self._shot_damage(data.get('vehicleID'), data.get('newHealth'), data.get('oldHealth'))
             elif event.type == ShotEventCollector.Event.TANK_HIT:
-                res = self._tank_hit(data.get('vehicleID'), data.get('point'))
+                res = self._tank_hit(data.get('vehicleID'), data.get('point'), data.get('extra'))
             elif event.type == ShotEventCollector.Event.TERRAIN_HIT:
                 res = self._terrain_hit(data.get('shotID'), data.get('point'))
             elif event.type == ShotEventCollector.Event.HIDE_TRACER:
@@ -86,9 +87,10 @@ class ShotEventCollector:
                 return True
             return False
 
-        def _tank_hit(self, vehicleID, point):
+        def _tank_hit(self, vehicleID, point, extra):
             if self.vehicle_wait_first_direct_hit == vehicleID and not self.direct_hit_point:
                 self.direct_hit_point = point
+                self.hit_extra = extra
                 return True
 
             if self.vehicle_wait_ricocheted_direct_hit == vehicleID:
@@ -234,6 +236,7 @@ class ShotEventCollector:
                     'shotID': self.shotID,
                     'status': status,
                     'tank_hit_point': self.direct_hit_point,
+                    'tank_hit_extra': self.hit_extra,
                     'terrain_hit_point': None if self.direct_hit_point else self.terrain_hit_point,
                     'tracer_end_point': self.hide_tracer_point,
                     'total_damage': sum(map(lambda t: t['damage'], self.damages)),
@@ -311,9 +314,9 @@ class ShotEventCollector:
         print_debug('[terrain_hit] shotID: %d' % shotID)
         self.append_event(ShotEventCollector.Event(ShotEventCollector.Event.TERRAIN_HIT, {'shotID': shotID, 'point': point}))
 
-    def tank_hit(self, vehicleID, point):
+    def tank_hit(self, vehicleID, point, extra=None):
         print_debug('[tank_hit] vehicle: %s' % vehicleID)
-        self.append_event(ShotEventCollector.Event(ShotEventCollector.Event.TANK_HIT, {'vehicleID': vehicleID, 'point': point}))
+        self.append_event(ShotEventCollector.Event(ShotEventCollector.Event.TANK_HIT, {'vehicleID': vehicleID, 'point': point, 'extra': extra}))
 
     def shot_result(self, vehicleID, flags):
         print_debug('[shot_result] vehicle: %s; direct: %s; ricochet: %s; damage: %s; crits: %s; kill: %s; fire: %s; flags: %d' % (vehicleID,

@@ -22,7 +22,7 @@ class OnBattleStart(Event):
 
     def __init__(self, ArenaTag, ArenaID, Team, PlayerName, PlayerBDID, PlayerClan, TankTag, TankType, TankLevel,
                  GunTag, StartDis, SpawnPoint, BattleMode, BattleGameplay, GameVersion, ServerName, Region, ModVersion,
-                 BattlePeriod, BattleTime, LoadTime, PreBattleWaitTime):
+                 BattlePeriod, BattleTime, LoadTime, PreBattleWaitTime, InQueueWaitTime, GameplayMask):
         Event.__init__(self, Event.NAMES.ON_BATTLE_START)
 
         self.ArenaTag = ArenaTag
@@ -47,6 +47,8 @@ class OnBattleStart(Event):
         self.BattleTime = BattleTime
         self.LoadTime = LoadTime
         self.PreBattleWaitTime = PreBattleWaitTime
+        self.InQueueWaitTime = InQueueWaitTime
+        self.GameplayMask = GameplayMask
 
 class OnShot(Event):
     class HIT_REASON:
@@ -83,6 +85,25 @@ class OnShot(Event):
         self.TracerVel = None
         self.Gravity = None
 
+        self.HitVehicleDescr = None
+        self.HitChassisDescr = None
+        self.HitTurretDescr = None
+        self.HitGunDescr = None
+        self.HitTurretYaw = None
+        self.HitTurretPitch = None
+        self.HitSegment = None
+
+        self.VehicleDescr = None
+        self.ChassisDescr = None
+        self.TurretDescr = None
+        self.GunDescr = None
+        self.TurretYaw = None
+        self.TurretPitch = None
+
+        self.ShellDescr = None
+        self.VehicleSpeed = None
+        self.TurretSpeed = None
+
         self.HitPoint = None
         self.HitReason = None
         self.Results = []
@@ -96,7 +117,8 @@ class OnShot(Event):
         self.ServerShotDispersion = dispersion
 
     def set_shoot(self, gun_position, battle_dispersion, shot_dispersion, shell_name, shell_tag, damage, caliber,
-                  piercingPower, speed, maxDistance, ping, fps, auto_aim, server_aim):
+                  piercingPower, speed, maxDistance, shell_descr, ping, fps, auto_aim, server_aim, vehicle_descr,
+                  chassis_descr, turret_descr, gun_descr, turret_yaw, turret_pitch, vehicle_speed, turret_speed):
         self.GunPoint = gun_position
         self.BattleDispersion = battle_dispersion
         self.GunDispersion = shot_dispersion
@@ -107,11 +129,22 @@ class OnShot(Event):
         self.ShellPiercingPower = piercingPower
         self.ShellSpeed = speed
         self.ShellMaxDistance = maxDistance
+        self.ShellDescr = shell_descr
+
+        self.VehicleSpeed = vehicle_speed
+        self.TurretSpeed = turret_speed
 
         self.Ping = ping
         self.FPS = fps
         self.AutoAim = auto_aim
         self.ServerAim = server_aim
+
+        self.VehicleDescr = vehicle_descr
+        self.ChassisDescr = chassis_descr
+        self.TurretDescr = turret_descr
+        self.GunDescr = gun_descr
+        self.TurretYaw = turret_yaw
+        self.TurretPitch = turret_pitch
 
     def set_tracer(self, shot_id, start, velocity, gravity):
         self.ShotID = shot_id
@@ -125,6 +158,15 @@ class OnShot(Event):
 
     def set_tracer_end(self, position):
         self.TracerEnd = position
+
+    def set_hit_extra(self, vehicle_descr, chassis_descr, turret_descr, gun_descr, turret_yaw, turret_pitch, segment):
+        self.HitVehicleDescr = vehicle_descr
+        self.HitChassisDescr = chassis_descr
+        self.HitTurretDescr = turret_descr
+        self.HitGunDescr = gun_descr
+        self.HitTurretYaw = turret_yaw
+        self.HitTurretPitch = turret_pitch
+        self.HitSegment = segment
 
     def add_result(self, tankTag, flags, shotDamage, fireDamage, ammoBayDestroyed, health, fireHealth):
         self.Results.append({'order': len(self.Results),
@@ -144,6 +186,7 @@ class OnShot(Event):
 
     def set_battle_time(self, time):
         self.BattleTime = time
+
 
 # TODO: Декодировать больше результатов
 class OnBattleResult(Event):

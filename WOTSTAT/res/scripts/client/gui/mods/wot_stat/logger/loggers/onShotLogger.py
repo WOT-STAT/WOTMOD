@@ -1,6 +1,7 @@
 # coding=utf-8
 import BigWorld
 from Math import Matrix
+from Vehicle import Vehicle
 from VehicleEffects import DamageFromShotDecoder
 from constants import SERVER_TICK_LENGTH, ATTACK_REASON, ATTACK_REASON_INDICES
 
@@ -10,12 +11,16 @@ from ..utils import vector, own_gun_position
 from ..wotHookEvents import wotHookEvents
 from ...utils import print_debug
 from ...logical.shotEventCollector import shotEventCollector
+from account_helpers.settings_core.settings_constants import GAME
+
 
 def own_effect_index(player):
     return map(lambda t: t.shell.effectsIndex, player.vehicleTypeDescriptor.gun.shots)
 
+
 def tank_name_by_id(vehicleID):
     return BigWorld.player().arena.vehicles[vehicleID]['vehicleType'].name
+
 
 def decode_hit_point(obj, decodedPoints):
     firstHitPoint = decodedPoints[0]
@@ -25,6 +30,13 @@ def decode_hit_point(obj, decodedPoints):
     firstHitDir.normalise()
     return compMatrix.applyPoint(firstHitPoint.matrix.translation)
 
+
+def get_full_descr(obj):
+    # type: (Vehicle) -> Tuple[Any, Any, Any, Any, Any, Any]
+    descr = obj.typeDescriptor
+    yaw, pitch = obj.getServerGunAngles()
+    return (descr.type.compactDescr, descr.chassis.compactDescr, descr.turret.compactDescr, descr.gun.compactDescr,
+            yaw, pitch)
 
 
 class OnShotLogger:
@@ -39,7 +51,6 @@ class OnShotLogger:
         wotHookEvents.PlayerAvatar_explodeProjectile += self.explode_projectile
         wotHookEvents.ProjectileMover_killProjectile += self.kill_projectile
         wotHookEvents.Vehicle_onHealthChanged += self.on_health_changed
-
 
         self.marker_server_pos = None
         self.marker_server_disp = None
@@ -65,13 +76,17 @@ class OnShotLogger:
                 if shotID not in self.shots:
                     continue
 
-                onShot = self.shots.pop(shotID) # type: OnShot
+                onShot = self.shots.pop(shotID)  # type: OnShot
 
-                if r['tank_hit_point']: onShot.set_hit(vector(r['tank_hit_point']), OnShot.HIT_REASON.TANK)
-                elif r['terrain_hit_point']: onShot.set_hit(vector(r['terrain_hit_point']), OnShot.HIT_REASON.TERRAIN)
+                if r['tank_hit_point']:
+                    onShot.set_hit(vector(r['tank_hit_point']), OnShot.HIT_REASON.TANK)
+                elif r['terrain_hit_point']:
+                    onShot.set_hit(vector(r['terrain_hit_point']), OnShot.HIT_REASON.TERRAIN)
 
                 if r['tracer_end_point']: onShot.set_tracer_end(vector(r['tracer_end_point']))
-
+                if r['tank_hit_extra']:
+                    vehicle_descr, chassis_descr, turret_descr, gun_descr, yaw, pitch, segment = r['tank_hit_extra']
+                    onShot.set_hit_extra(vehicle_descr, chassis_descr, turret_descr, gun_descr, yaw, pitch, str(segment))
 
                 def acc(a, v):
                     a[v['vehicleID']] = v
@@ -86,11 +101,11 @@ class OnShotLogger:
                                       flags=results['flags'],
                                       shotDamage=damage['damage'] if damage else 0,
                                       fireDamage=fire_damage['damage'] if fire_damage else 0,
-                                      ammoBayDestroyed=(damage['ammo_bay_destr'] if damage else False) or (fire_damage['ammo_bay_destr'] if fire_damage else False),
+                                      ammoBayDestroyed=(damage['ammo_bay_destr'] if damage else False) or (
+                                          fire_damage['ammo_bay_destr'] if fire_damage else False),
                                       health=damage['newHealth'] if damage else None,
                                       fireHealth=fire_damage['newHealth'] if fire_damage else None)
                 eventLogger.emit_event(onShot)
-
 
                 log = ""
                 log += "________________RESULT_________________\n"
@@ -108,7 +123,6 @@ class OnShotLogger:
                 log += "_______________________________________"
 
                 print_debug(log)
-
 
     def update_gun_marker_server(self, obj, vehicleID, shotPos, shotVec, dispersionAngle, *a, **k):
         self.marker_server_pos = obj._VehicleGunRotator__getGunMarkerPosition(
@@ -133,6 +147,8 @@ class OnShotLogger:
         self.temp_shot.set_server_marker(vector(self.marker_server_pos), self.marker_server_disp)
         self.temp_shot.set_client_marker(vector(self.marker_client_pos), self.marker_client_disp)
         shot = player.vehicleTypeDescriptor.shot
+
+        vehicle_descr, chassis_descr, turret_descr, gun_descr, yaw, pitch = get_full_descr(player.vehicle)
         self.temp_shot.set_shoot(gun_position=vector(own_gun_position(player)),
                                  battle_dispersion=player.vehicleTypeDescriptor.gun.shotDispersionAngle,
                                  shot_dispersion=(
@@ -145,15 +161,25 @@ class OnShotLogger:
                                  piercingPower=str(shot.piercingPower),
                                  speed=shot.speed / 0.8,
                                  maxDistance=shot.maxDistance,
+                                 shell_descr=shot.shell.compactDescr,
                                  ping=BigWorld.LatencyInfo().value[3] - 0.5 * SERVER_TICK_LENGTH,
                                  fps=BigWorld.getFPS()[1],
                                  auto_aim=(player.autoAimVehicle is not None),
-                                 server_aim=bool(player.gunRotator.settingsCore.getSetting('useServerAim'))
+                                 server_aim=bool(player.gunRotator.settingsCore.getSetting('useServerAim')),
+                                 vehicle_speed=player.getOwnVehicleSpeeds()[0]*3.6,
+                                 turret_speed=player.gunRotator.turretRotationSpeed,
+                                 vehicle_descr=vehicle_descr,
+                                 chassis_descr=chassis_descr,
+                                 turret_descr=turret_descr,
+                                 gun_descr=gun_descr,
+                                 turret_pitch=pitch,
+                                 turret_yaw=yaw
                                  )
         self.shot_click_time = BigWorld.serverTime()
         print_debug('shoot')
 
-    def show_tracer(self, obj, attackerID, shotID, isRicochet, effectsIndex, refStartPoint, refVelocity, gravity, *a, **k):
+    def show_tracer(self, obj, attackerID, shotID, isRicochet, effectsIndex, refStartPoint, refVelocity, gravity, *a,
+                    **k):
         player = BigWorld.player()
         if isRicochet or attackerID != player.playerVehicleID or effectsIndex not in own_effect_index(player):
             return
@@ -176,7 +202,8 @@ class OnShotLogger:
             shotEventCollector.shot_result(vehicleID, flags)
 
     def on_health_changed(self, obj, newHealth, oldHealth, attackerID, attackReasonID):
-        if attackerID == BigWorld.player().playerVehicleID and BigWorld.player().arena.vehicles[obj.id]['team'] != BigWorld.player().team:
+        if attackerID == BigWorld.player().playerVehicleID and BigWorld.player().arena.vehicles[obj.id][
+            'team'] != BigWorld.player().team:
             if attackReasonID == ATTACK_REASON_INDICES[ATTACK_REASON.SHOT]:
                 shotEventCollector.shot_damage(obj.id, newHealth, oldHealth)
             if attackReasonID == ATTACK_REASON_INDICES[ATTACK_REASON.FIRE]:
@@ -200,7 +227,7 @@ class OnShotLogger:
         if not decodedPoints:
             return
 
-        shotEventCollector.tank_hit(obj.id, decode_hit_point(obj, decodedPoints))
+        shotEventCollector.tank_hit(obj.id, decode_hit_point(obj, decodedPoints), get_full_descr(obj) + (points[0],))
 
     def kill_projectile(self, obj, shotID, position, impactVelDir, deathType, *a, **k):
         shot = abs(shotID)

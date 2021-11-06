@@ -2,6 +2,8 @@
 import BattleReplay
 import BigWorld
 from account_shared import readClientServerVersion
+from PlayerEvents import g_playerEvents
+from account_helpers import gameplay_ctx
 from constants import ARENA_PERIOD, ARENA_GAMEPLAY_NAMES, AUTH_REALM, ARENA_PERIOD_NAMES
 
 from ..eventLogger import eventLogger, battle_time
@@ -12,10 +14,12 @@ from ...load_mod import config
 from ...utils import print_log, print_debug
 
 
+
 class OnBattleStartLogger:
     def __init__(self):
         self.battle_loaded = False
 
+        self.on_enter_queue_time = 0  # Вход в очередь
         self.on_enter_world_time = 0  # Вход в бой
         self.on_end_load_time = 0  # Завершение загрузки
         self.shot_disp_multiplier_factor = 0
@@ -23,6 +27,10 @@ class OnBattleStartLogger:
         wotHookEvents.PlayerAvatar_onEnterWorld += self.on_enter_world
         wotHookEvents.PlayerAvatar_updateTargetingInfo += self.update_targeting_info
         wotHookEvents.PlayerAvatar_onArenaPeriodChange += self.on_arena_period_change
+        g_playerEvents.onEnqueued += self.onEnqueued
+
+    def onEnqueued(self, queueType):
+        self.on_enter_queue_time = BigWorld.serverTime()
 
     def on_enter_world(self, obj, *a, **k):
         print_debug('OnBattleStartLogger.on_enter_world')
@@ -88,7 +96,9 @@ class OnBattleStartLogger:
                                       BattlePeriod=ARENA_PERIOD_NAMES[player.arena.period],
                                       BattleTime=battle_time(),
                                       LoadTime=self.on_end_load_time - self.on_enter_world_time,
-                                      PreBattleWaitTime=BigWorld.serverTime() - self.on_end_load_time
+                                      PreBattleWaitTime=BigWorld.serverTime() - self.on_end_load_time,
+                                      InQueueWaitTime=self.on_enter_world_time-self.on_enter_queue_time,
+                                      GameplayMask=gameplay_ctx.getMask()
                                       )
         eventLogger.emit_event(onBattleStart)
 

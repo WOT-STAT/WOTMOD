@@ -4,6 +4,8 @@ import BigWorld
 
 import threading
 import urllib2
+import ssl
+context = ssl._create_unverified_context()
 
 json_headers = {'Content-type': 'application/json',
                 'Accept': 'application/json'}
@@ -36,12 +38,12 @@ def get(url, data):
     if data:
         params = urllib2.urlencode(data)
         url = '?'.join(url, params)
-    return urllib2.urlopen(url).read()
+    return urllib2.urlopen(url, context=context).read()
 
 
 def post(url, data):
     if data:
         req = urllib2.Request(url, data, headers=json_headers)
-        return urllib2.urlopen(req).read()
+        return urllib2.urlopen(req, context=context).read()
     else:
-        return urllib2.urlopen(url).read()
+        return urllib2.urlopen(url, context=context).read()

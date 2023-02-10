@@ -13,6 +13,9 @@ class OnBattleResultLogger:
     battle_loaded = False
 
     def __init__(self):
+        self.arenas_id_wait_battle_result = []
+        self.battle_loaded = False
+
         g_playerEvents.onBattleResultsReceived += self.on_battle_results_received
         eventLogger.on_session_created += self.on_session_created
         self.battle_result_cache_checker()

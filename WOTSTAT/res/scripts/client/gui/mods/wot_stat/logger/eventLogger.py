@@ -16,6 +16,10 @@ class EventLogger:
     on_session_created = BigWorldEvent.Event()
 
     def __init__(self):
+        self.old_battle_event_sessions = {}
+        self.battle_event_session = None
+        self.start_battle_time = 0
+        self.on_session_created = BigWorldEvent.Event()
         print_debug('INIT EVENT LOGGER')
 
     def emit_event(self, event, arena_id=None):

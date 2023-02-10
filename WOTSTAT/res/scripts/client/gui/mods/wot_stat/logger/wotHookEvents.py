@@ -24,6 +24,7 @@ class WotHookEvents:
         self.PlayerAvatar_showTracer = Event.Event()
         self.PlayerAvatar_showShotResults = Event.Event()
         self.Vehicle_onHealthChanged = Event.Event()
+        self.PlayerAvatar_showOwnVehicleHitDirection = Event.Event()
         # -------------------EXPLOSION------------------#
         self.PlayerAvatar_explodeProjectile = Event.Event()
         self.Vehicle_showDamageFromShot = Event.Event()
@@ -68,7 +69,6 @@ def updateGunMarker(self, *a, **k):
 def shoot(self, *a, **k):
     wotHookEvents.PlayerAvatar_shoot(self, *a, **k)
 
-
 @g_overrideLib.registerEvent(PlayerAvatar, 'showTracer')
 def showTracer(self, *a, **k):
     wotHookEvents.PlayerAvatar_showTracer(self, *a, **k)
@@ -80,6 +80,10 @@ def showShotResults(self, *a, **k):
 @g_overrideLib.registerEvent(Vehicle, 'onHealthChanged')
 def onHealthChanged(self, *a, **k):
    wotHookEvents.Vehicle_onHealthChanged(self, *a, **k)
+
+@g_overrideLib.registerEvent(PlayerAvatar, 'showOwnVehicleHitDirection')
+def showOwnVehicleHitDirection(self, *a, **k):
+    wotHookEvents.PlayerAvatar_showOwnVehicleHitDirection(self, *a, **k)
 
 
 # -------------------EXPLOSION------------------#

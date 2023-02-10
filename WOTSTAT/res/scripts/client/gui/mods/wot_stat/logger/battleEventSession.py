@@ -24,10 +24,13 @@ class BattleEventSession:
     def __init__(self, event_URL, init_URL, on_end_load_event, sendInterval=5):
         # type: (str, str, OnBattleStart, float) -> None
 
-        self.eventURL = event_URL
+        self.send_queue = []
+        self.token = None
         self.initURL = init_URL
+        self.eventURL = event_URL
         self.send_interval = sendInterval
         self.arenaID = on_end_load_event.ArenaID
+        self.enable = False
 
         data = json.dumps(on_end_load_event.get_dict())
         print_log(data)

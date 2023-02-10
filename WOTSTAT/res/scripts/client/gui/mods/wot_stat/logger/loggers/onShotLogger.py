@@ -68,7 +68,7 @@ class OnShotLogger:
 
     def check_shot_result(self):
         BigWorld.callback(1, self.check_shot_result)
-        shotEventCollector.append_event(None)
+        shotEventCollector.process_events()
         results = shotEventCollector.get_result()
         if results:
             for r in results:

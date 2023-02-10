@@ -13,6 +13,7 @@ from ..wotHookEvents import wotHookEvents
 class OnRibbonsLogger:
     number = 0
     def __init__(self):
+        self.number = 0
         wotHookEvents.PlayerAvatar_onEnterWorld += self.on_enter_world
 
     def on_enter_world(self, *a, **k):

@@ -268,13 +268,10 @@ class ShotEventCollector:
 
         return results
 
-    def append_event(self, event):
+    def process_events(self):
         need_to_remove = []
-
         time = BigWorld.serverTime()
 
-        if event:
-            self.session_events.append(event)
         for event in self.session_events:
             if time - event.time > EVENT_TIMEOUT:
                 print_debug("event timeout: %s" % str(event.type))
@@ -293,10 +290,14 @@ class ShotEventCollector:
                         self.on_shot_loggers[shot_logger].can_hit = True
                         break
 
-
-
         for event in need_to_remove:
             self.session_events.remove(event)
+
+    def append_event(self, event):
+        if event:
+            self.session_events.append(event)
+            self.process_events()
+
 
 
     def show_tracer(self, shotID, start, velocity, gravity, shot_click_time):

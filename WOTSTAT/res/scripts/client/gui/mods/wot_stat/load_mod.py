@@ -5,7 +5,7 @@ from gui import SystemMessages
 
 from .common.config import Config
 from .common.modAutoUpdate import update_game_version, update_mod_version
-from utils import print_log
+from .utils import print_log
 
 configPath = './mods/configs/wot_stat/config.cfg'
 config = Config(configPath)  # type: Config
@@ -14,7 +14,7 @@ from .logger.eventLogger import eventLogger
 
 
 def mod_name_version(version):
-    return 'wotStat_' + version + '.wotmod'
+    return 'mod.wotStat_' + version + '.wotmod'
 
 
 def mod_name():

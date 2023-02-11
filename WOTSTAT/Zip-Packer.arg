@@ -1,7 +1,0 @@
-#-------------------- Zip-Packer parameters --------------------
-#{VERSION} - zip-packer replaces the arg with the version-tag from meta.xml
-
-exe  = "C:\Program Files\7-Zip\7z.exe"
-#arg  = "a -tzip -mx0 ..\release\wotStat_{VERSION}.wotmod meta.xml res\ -xr!*.py -xr!*.DS_Store"
-arg = "a -tzip -mx0 C:\Games\World_of_Tanks_RU\mods\1.19.1.1\mod.dev_wotStat_{VERSION}.wotmod meta.xml res\ -xr!*.py -xr!*.DS_Store"
-meta = "meta.xml"

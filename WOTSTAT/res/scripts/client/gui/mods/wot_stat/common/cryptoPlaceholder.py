@@ -2,4 +2,4 @@ import BigWorld
 
 
 def encrypt(str):
-    return str
+  return str

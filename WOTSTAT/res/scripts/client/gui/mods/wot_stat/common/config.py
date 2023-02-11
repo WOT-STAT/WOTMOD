@@ -3,6 +3,7 @@ import os
 import BigWorld
 from ..utils import print_log
 
+
 class Config:
     config = {}
     defaultParams = {
@@ -14,6 +15,8 @@ class Config:
     def __init__(self, ConfigPath, DefaultParams=None):
         if DefaultParams:
             self.defaultParams = DefaultParams
+            
+            
 
         if os.path.exists(ConfigPath):
             with open(ConfigPath, "r") as f:
@@ -24,7 +27,6 @@ class Config:
                 except Exception, e:
                     print_log('load config error')
                     print_log(e)
-
 
     def get(self, key):
         return self.config[key] if key in self.config else self.defaultParams[

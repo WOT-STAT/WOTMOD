@@ -10,22 +10,24 @@ from gui.Scaleform.daapi.view.battle.shared.ribbons_aggregator import _Ribbon, _
 
 from ..wotHookEvents import wotHookEvents
 
+
 class OnRibbonsLogger:
-    number = 0
-    def __init__(self):
-        self.number = 0
-        wotHookEvents.PlayerAvatar_onEnterWorld += self.on_enter_world
+  number = 0
 
-    def on_enter_world(self, *a, **k):
-        sessionProvider = dependency.instance(IBattleSessionProvider)
-        sessionProvider.shared.feedback.onPlayerFeedbackReceived += self.on_player_feedback_received
+  def __init__(self):
+    self.number = 0
+    wotHookEvents.PlayerAvatar_onEnterWorld += self.on_enter_world
 
-    def on_player_feedback_received(self, events):
-        for event in events:
-            self.number += 1
-            event = _createRibbonFromPlayerFeedbackEvent(self.number, event) # type: _Ribbon
-            # print(event.getType())
-            # print(event.__slots__)
+  def on_enter_world(self, *a, **k):
+    sessionProvider = dependency.instance(IBattleSessionProvider)
+    sessionProvider.shared.feedback.onPlayerFeedbackReceived += self.on_player_feedback_received
+
+  def on_player_feedback_received(self, events):
+    for event in events:
+      self.number += 1
+      event = _createRibbonFromPlayerFeedbackEvent(self.number, event)  # type: _Ribbon
+      # print(event.getType())
+      # print(event.__slots__)
 
 
 onRibbonsLogger = OnRibbonsLogger()

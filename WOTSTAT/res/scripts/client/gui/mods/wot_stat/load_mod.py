@@ -12,27 +12,27 @@ config = Config(configPath)  # type: Config
 from .logger.eventLogger import eventLogger
 
 
-
 def mod_name_version(version):
-    return 'mod.wotStat_' + version + '.wotmod'
+  return 'mod.wotStat_' + version + '.wotmod'
 
 
 def mod_name():
-    return mod_name_version(config.get('version'))
+  return mod_name_version(config.get('version'))
 
 
 def init_mod():
-    global logger
+  global logger
 
-    print_log('version ' + config.get('version'))
+  print_log('version ' + config.get('version'))
 
-    update_game_version(mod_name())
-    update_mod_version('https://dev.wotstat.soprachev.com/api/modnotification/version', 'mod.wotStat', config.get('version'),
-                       on_start_update=lambda t: print_log(
-                           'Found new mod version ' + t),
-                       on_updated=lambda t: SystemMessages.pushMessage(
-                           '[WotStat] успешно обновлён до версии ' + t +
-                           '. После перезапуска игры обновление будет применено',
-                           type=SystemMessages.SM_TYPE.Warning))
+  update_game_version(mod_name())
+  update_mod_version('https://dev.wotstat.soprachev.com/api/modnotification/version', 'mod.wotStat',
+                     config.get('version'),
+                     on_start_update=lambda t: print_log(
+                       'Found new mod version ' + t),
+                     on_updated=lambda t: SystemMessages.pushMessage(
+                       '[WotStat] успешно обновлён до версии ' + t +
+                       '. После перезапуска игры обновление будет применено',
+                       type=SystemMessages.SM_TYPE.Warning))
 
 

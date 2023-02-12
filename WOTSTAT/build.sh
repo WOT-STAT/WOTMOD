@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 while getopts v: flag
 do
@@ -11,7 +11,7 @@ done
 rm -rf ./build
 mkdir ./build
 cp -r ./res ./build
-python -m compileall ./build
+python2 -m compileall ./build
 
 meta=$(<meta.xml)
 meta="${meta/\{\{VERSION\}\}/$v}"
@@ -21,8 +21,8 @@ echo "$meta" > ./meta.xml
 
 folder="mod.wotStat_$v.wotmod"
 
-zip -dvr0 -X $folder res -i "*.pyc"
-zip -v0 -X $folder meta.xml
+zip -dvr -0 -X $folder res -i "*.pyc"
+zip -vr -0 -X $folder meta.xml
 
 cd ../
 cp ./build/$folder $folder

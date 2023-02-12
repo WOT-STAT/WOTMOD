@@ -11,6 +11,10 @@ done
 rm -rf ./build
 mkdir ./build
 cp -r ./res ./build
+
+configPath="./build/res/scripts/client/gui/mods/wot_stat/common/config.py"
+echo -e "version = '$v'\n$(cat $configPath)" > $configPath
+
 python2 -m compileall ./build
 
 meta=$(<meta.xml)

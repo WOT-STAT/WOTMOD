@@ -65,11 +65,11 @@ class OnBattleResultLogger:
       print_log('cannot decode battle result\n' + str(e))
 
     eventLogger.emit_event(OnBattleResult(
-      Result=decodeResult.get('res'),
-      Credits=decodeResult.get('credits'),
-      XP=decodeResult.get('xp'),
-      Duration=decodeResult.get('duration') * 1000,
-      BotsCount=decodeResult.get('bots_count')
+      result=decodeResult.get('res'),
+      credits=decodeResult.get('credits'),
+      xp=decodeResult.get('xp'),
+      duration=decodeResult.get('duration') * 1000,
+      botsCount=decodeResult.get('bots_count')
     ), arena_id=arenaID)
 
 

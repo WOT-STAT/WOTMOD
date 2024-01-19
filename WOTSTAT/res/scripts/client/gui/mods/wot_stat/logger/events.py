@@ -211,10 +211,14 @@ class OnShot(DynamicBattleEvent):
 
 
 # TODO: Декодировать больше результатов
-class OnBattleResult(Event):
-  def __init__(self, raw=None, result=None):
+class OnBattleResult(DynamicBattleEvent):
+  raw = None
+  result = None
+
+  def __init__(self):
     Event.__init__(self, Event.NAMES.ON_BATTLE_RESULT)
 
+  def set_result(self, raw, result):
     self.raw = raw
     self.result = result
 

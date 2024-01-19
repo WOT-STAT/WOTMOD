@@ -1,9 +1,13 @@
+from typing import Optional, Any
+
 import BattleReplay
 import BigWorld
 from PlayerEvents import g_playerEvents
 from ..eventLogger import eventLogger
 from ..events import OnBattleResult
 from ...utils import print_log, print_debug
+from items import vehicles as vehiclesWG
+from ..utils import short_tank_type, setup_dynamic_battle_info
 
 
 class OnBattleResultLogger:
@@ -12,6 +16,7 @@ class OnBattleResultLogger:
 
   def __init__(self):
     self.arenas_id_wait_battle_result = []
+    self.precreated_battle_result_event = dict()
     self.battle_loaded = False
 
     g_playerEvents.onBattleResultsReceived += self.on_battle_results_received
@@ -20,6 +25,9 @@ class OnBattleResultLogger:
 
   def on_session_created(self, battleEventSession):
     self.arenas_id_wait_battle_result.append(battleEventSession.arenaID)
+    event = OnBattleResult()
+    setup_dynamic_battle_info(event)
+    self.precreated_battle_result_event[battleEventSession.arenaID] = event
 
   def on_battle_results_received(self, isPlayerVehicle, results):
     if not isPlayerVehicle or BattleReplay.isPlaying():
@@ -52,6 +60,7 @@ class OnBattleResultLogger:
       return
 
     self.arenas_id_wait_battle_result.remove(arenaID)
+    battleEvent = self.precreated_battle_result_event.pop(arenaID)  # type: OnBattleResult
 
     decodeResult = {}
     try:
@@ -65,6 +74,7 @@ class OnBattleResultLogger:
       playersResultList = list()
 
       def getVehicleInfo(vehicle):
+        veWG = vehiclesWG.getVehicleType(vehicle['typeCompDescr'])
         return {
           'spotted': vehicle['spotted'],
           'lifeTime': vehicle['lifeTime'],
@@ -87,6 +97,9 @@ class OnBattleResultLogger:
           'piercingsReceived': vehicle['piercingsReceived'],
           'directHitsReceived': vehicle['directHitsReceived'],
           'explosionHitsReceived': vehicle['explosionHitsReceived'],
+          'tankLevel': veWG.level,
+          'tankTag': veWG.name,
+          'tankType': short_tank_type(veWG.classTag),
         }
 
       for vehicleId in vehicles:
@@ -125,10 +138,8 @@ class OnBattleResultLogger:
     except Exception, e:
       print_log('cannot decode battle result\n' + str(e))
 
-    eventLogger.emit_event(OnBattleResult(
-      result=decodeResult,
-      raw=str(results)
-    ), arena_id=arenaID)
+    battleEvent.set_result(result=decodeResult, raw=str(results))
+    eventLogger.emit_event(battleEvent, arena_id=arenaID)
 
 
 onBattleResultLogger = OnBattleResultLogger()

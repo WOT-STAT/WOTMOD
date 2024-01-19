@@ -1,5 +1,3 @@
-from functools import partial
-
 import BattleReplay
 import BigWorld
 from PlayerEvents import g_playerEvents
@@ -39,15 +37,17 @@ class OnBattleResultLogger:
       arenaID = self.arenas_id_wait_battle_result.pop(0)
       self.arenas_id_wait_battle_result.append(arenaID)
       try:
-        BigWorld.player().battleResultsCache.get(arenaID, partial(result_callback, arenaID))
+        BigWorld.player().battleResultsCache.get(arenaID, lambda code, battleResults: result_callback(arenaID, code,
+                                                                                                      battleResults))
       except:
         pass
 
 
   # TODO: Декодировать больше результатов
   def process_battle_result(self, results):
-
     arenaID = results.get('arenaUniqueID')
+    print_debug("Got result for {}".format(arenaID))
+
     if arenaID not in self.arenas_id_wait_battle_result:
       return
 
@@ -55,21 +55,79 @@ class OnBattleResultLogger:
 
     decodeResult = {}
     try:
-      decodeResult['res'] = 'win' if results['personal']['avatar']['team'] == results['common'][
-        'winnerTeam'] else 'lose'
-      decodeResult['xp'] = results['personal']['avatar']['xp']
-      decodeResult['credits'] = results['personal']['avatar']['credits']
+      winnerTeam = results['common']['winnerTeam']
+      playerTeam = results['personal']['avatar']['team']
+      winnerTeamIsMy = playerTeam == winnerTeam
+      teamHealth = [results['common']['teamHealth'][1], results['common']['teamHealth'][2]]
+
+      players = results['players']
+      vehicles = results['vehicles']
+      playersResultList = list()
+
+      def getVehicleInfo(vehicle):
+        return {
+          'spotted': vehicle['spotted'],
+          'lifeTime': vehicle['lifeTime'],
+          'mileage': vehicle['mileage'],
+          'damageBlockedByArmor': vehicle['damageBlockedByArmor'],
+          'damageAssistedRadio': vehicle['damageAssistedRadio'],
+          'damageAssistedTrack': vehicle['damageAssistedTrack'],
+          'damageAssistedStun': vehicle['damageAssistedStun'],
+          'damageReceivedFromInvisibles': vehicle['damageReceivedFromInvisibles'],
+          'damageReceived': vehicle['damageReceived'],
+          'shots': vehicle['shots'],
+          'directEnemyHits': vehicle['directEnemyHits'],
+          'piercingEnemyHits': vehicle['piercingEnemyHits'],
+          'explosionHits': vehicle['explosionHits'],
+          'damaged': vehicle['damaged'],
+          'damageDealt': vehicle['damageDealt'],
+          'kills': vehicle['kills'],
+          'stunned': vehicle['stunned'],
+          'stunDuration': vehicle['stunDuration'],
+          'piercingsReceived': vehicle['piercingsReceived'],
+          'directHitsReceived': vehicle['directHitsReceived'],
+          'explosionHitsReceived': vehicle['explosionHitsReceived'],
+        }
+
+      for vehicleId in vehicles:
+        vehicle = vehicles[vehicleId][0]
+        bdid = vehicle['accountDBID']
+        if bdid not in players: continue
+        player = players[bdid]
+        res = {
+          'name': player['realName'],
+          'bdid': bdid,
+          'team': player['team'],
+          'xp': vehicle['xp']
+        }
+        res.update(getVehicleInfo(vehicle))
+        playersResultList.append(res)
+
+      avatar = results['personal']['avatar']
+      personalRes = results['personal'].items()[0][1]
+      personal = {
+        'team': avatar['team'],
+        'xp': personalRes['originalXP']
+      }
+
+      personal.update(getVehicleInfo(personalRes))
+
+      decodeResult['playerTeam'] = playerTeam
+      decodeResult['result'] = 'tie' if not winnerTeam else 'win' if winnerTeamIsMy else 'lose'
+      decodeResult['teamHealth'] = teamHealth
+      decodeResult['personal'] = personal
+      decodeResult['playersResults'] = playersResultList
+      decodeResult['credits'] = avatar['credits']
+      decodeResult['originalCredits'] = personalRes['originalCredits']
       decodeResult['duration'] = results['common']['duration']
-      decodeResult['bots_count'] = len(results['common']['bots'])
+      decodeResult['winnerTeam'] = winnerTeam
+
     except Exception, e:
       print_log('cannot decode battle result\n' + str(e))
 
     eventLogger.emit_event(OnBattleResult(
-      result=decodeResult.get('res'),
-      credits=decodeResult.get('credits'),
-      xp=decodeResult.get('xp'),
-      duration=decodeResult.get('duration') * 1000,
-      botsCount=decodeResult.get('bots_count')
+      result=decodeResult,
+      raw=str(results)
     ), arena_id=arenaID)
 
 

@@ -1,6 +1,6 @@
 const express = require('express')
 const app = express()
-const port = 5000
+const port = 8000
 
 app.use(express.json());
 
@@ -9,6 +9,7 @@ battleToken = 0
 
 app.post('/api/events/OnBattleStart', (req, res) => {
     console.log(req.body);
+    console.log("JSON: " + JSON.stringify(req.body));
     console.log("Send new token: " + battleToken);
     res.send(`${battleToken++}`).end()
 
@@ -23,6 +24,7 @@ app.post('/api/events/send', (req, res) => {
         console.log('_____________________________\n\n');
     });
 
+    console.log("JSON: " + JSON.stringify(req.body));
     res.status(200).end()
 })
 

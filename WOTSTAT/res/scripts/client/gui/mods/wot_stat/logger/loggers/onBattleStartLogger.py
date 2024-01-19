@@ -1,13 +1,12 @@
 import BattleReplay
 import BigWorld
-from account_shared import readClientServerVersion
 from PlayerEvents import g_playerEvents
 from account_helpers import gameplay_ctx
-from constants import ARENA_PERIOD, ARENA_GAMEPLAY_NAMES, AUTH_REALM, ARENA_PERIOD_NAMES
+from constants import ARENA_PERIOD, ARENA_PERIOD_NAMES
 
 from ..eventLogger import eventLogger, battle_time
 from ..events import OnBattleStart
-from ..utils import short_tank_type, get_tank_type, vector, ARENA_TAGS
+from ..utils import vector, setup_dynamic_battle_info
 from ..wotHookEvents import wotHookEvents
 from ...load_mod import config
 from ...utils import print_log, print_debug
@@ -72,23 +71,9 @@ class OnBattleStartLogger:
       else player.arena.periodEndTime - player.arena.periodLength
 
     player.enableServerAim(True)
-    onBattleStart = OnBattleStart(arenaTag=player.arena.arenaType.geometry,
-                                  arenaId=player.arenaUniqueID,
-                                  team=player.team,
-                                  playerName=player.name,
-                                  playerBdid=player.arena.vehicles[player.playerVehicleID]['accountDBID'],
-                                  playerClan=player.arena.vehicles[player.playerVehicleID]['clanAbbrev'],
-                                  tankTag=BigWorld.entities[BigWorld.player().playerVehicleID].typeDescriptor.name,
-                                  tankType=short_tank_type(get_tank_type(player.vehicleTypeDescriptor.type.tags)),
-                                  tankLevel=player.vehicleTypeDescriptor.level,
-                                  gunTag=player.vehicleTypeDescriptor.gun.name,
-                                  startDis=player.vehicleTypeDescriptor.gun.shotDispersionAngle * self.shot_disp_multiplier_factor,
+    onBattleStart = OnBattleStart(arenaId=player.arenaUniqueID,
+                                  playerDBID=player.arena.vehicles[player.playerVehicleID]['accountDBID'],
                                   spawnPoint=vector(player.getOwnVehiclePosition()),
-                                  battleMode=ARENA_TAGS[player.arena.bonusType],
-                                  battleGameplay=ARENA_GAMEPLAY_NAMES[player.arenaTypeID >> 16],
-                                  gameVersion=readClientServerVersion()[1],
-                                  serverName=player.connectionMgr.serverUserName,
-                                  region=AUTH_REALM,
                                   modVersion=config.get('version'),
                                   battlePeriod=ARENA_PERIOD_NAMES[player.arena.period],
                                   battleTime=battle_time(),
@@ -97,6 +82,9 @@ class OnBattleStartLogger:
                                   inQueueWaitTime=self.on_enter_world_time - self.on_enter_queue_time,
                                   gameplayMask=gameplay_ctx.getMask()
                                   )
+
+    setup_dynamic_battle_info(onBattleStart)
+
     eventLogger.emit_event(onBattleStart)
 
 

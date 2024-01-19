@@ -25,6 +25,8 @@ echo "$meta" > ./meta.xml
 
 folder="mod.wotStat_$v.wotmod"
 
+rm -rf $folder
+
 zip -dvr -0 -X $folder res -i "*.pyc"
 zip -vr -0 -X $folder meta.xml
 

@@ -7,5 +7,8 @@ release/
 venv/
 *.pyc
 
+#js
+node_modules/
+
 crypto.py
 *.wotmod

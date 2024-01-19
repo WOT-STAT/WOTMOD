@@ -1,12 +1,13 @@
 import BigWorld
+import math
 from Math import Matrix
 from Vehicle import Vehicle
 from VehicleEffects import DamageFromShotDecoder
-from constants import SERVER_TICK_LENGTH, ATTACK_REASON, ATTACK_REASON_INDICES
+from constants import SERVER_TICK_LENGTH, ATTACK_REASON, ATTACK_REASON_INDICES, ARENA_PERIOD
 
 from ..eventLogger import eventLogger, battle_time
 from ..events import OnShot
-from ..utils import vector, own_gun_position
+from ..utils import vector, own_gun_position, setup_dynamic_battle_info
 from ..wotHookEvents import wotHookEvents
 from ...utils import print_debug
 from ...logical.shotEventCollector import shotEventCollector
@@ -32,10 +33,14 @@ def decode_hit_point(obj, decodedPoints):
 
 def get_full_descr(obj):
   # type: (Vehicle) -> Tuple[Any, Any, Any, Any, Any, Any]
-  descr = obj.typeDescriptor
+  descr = obj.vehicleTypeDescriptor
   yaw, pitch = obj.getServerGunAngles()
   return (descr.type.compactDescr, descr.chassis.compactDescr, descr.turret.compactDescr, descr.gun.compactDescr,
           yaw, pitch)
+
+
+def avg(items):
+  return sum(items) * 1.0 / len(items)
 
 
 class OnShotLogger:
@@ -50,6 +55,7 @@ class OnShotLogger:
     wotHookEvents.PlayerAvatar_explodeProjectile += self.explode_projectile
     wotHookEvents.ProjectileMover_killProjectile += self.kill_projectile
     wotHookEvents.Vehicle_onHealthChanged += self.on_health_changed
+    wotHookEvents.PlayerAvatar_onArenaPeriodChange += self.on_arena_period_change
 
     self.marker_server_pos = None
     self.marker_server_disp = None
@@ -64,6 +70,12 @@ class OnShotLogger:
 
     self.active_tracers = []
     self.history_tracers = []
+
+    self.cachedVehicle = None
+
+  def on_arena_period_change(self, obj, period, *a, **k):
+    if period is ARENA_PERIOD.BATTLE:
+      self.cachedVehicle = BigWorld.player().vehicle
 
   def check_shot_result(self):
     BigWorld.callback(1, self.check_shot_result)
@@ -125,7 +137,7 @@ class OnShotLogger:
 
   def update_gun_marker_server(self, obj, vehicleID, shotPos, shotVec, dispersionAngle, *a, **k):
     self.marker_server_pos = obj._VehicleGunRotator__getGunMarkerPosition(
-      shotPos, shotVec, (dispersionAngle, dispersionAngle))[0]
+      shotPos, shotVec, [dispersionAngle, dispersionAngle, dispersionAngle, dispersionAngle])[0]
     self.marker_server_disp = dispersionAngle
 
   def update_gun_marker_client(self, obj, *a, **k):
@@ -142,12 +154,13 @@ class OnShotLogger:
 
     player = BigWorld.player()
     self.temp_shot.set_battle_time(battle_time())
-    self.temp_shot.set_date()
     self.temp_shot.set_server_marker(vector(self.marker_server_pos), self.marker_server_disp)
     self.temp_shot.set_client_marker(vector(self.marker_client_pos), self.marker_client_disp)
+    setup_dynamic_battle_info(self.temp_shot)
     shot = player.vehicleTypeDescriptor.shot
 
-    vehicle_descr, chassis_descr, turret_descr, gun_descr, yaw, pitch = get_full_descr(player.vehicle)
+    vehicle_descr, chassis_descr, turret_descr, gun_descr, yaw, pitch = get_full_descr(
+      player.vehicle if player.vehicle else self.cachedVehicle)
     self.temp_shot.set_shoot(gun_position=vector(own_gun_position(player)),
                              battle_dispersion=player.vehicleTypeDescriptor.gun.shotDispersionAngle,
                              shot_dispersion=(
@@ -155,18 +168,19 @@ class OnShotLogger:
                                  player._PlayerAvatar__aimingInfo[2]),
                              shell_name=player.vehicleTypeDescriptor.shot.shell.name,
                              shell_tag=player.vehicleTypeDescriptor.shot.shell.kind,
-                             damage=str(shot.shell.damage),
+                             damage=avg(shot.shell.damage),
                              caliber=shot.shell.caliber,
-                             piercingPower=str(shot.piercingPower),
+                             piercingPower=avg(shot.piercingPower),
                              speed=shot.speed / 0.8,
                              maxDistance=shot.maxDistance,
                              shell_descr=shot.shell.compactDescr,
                              ping=BigWorld.LatencyInfo().value[3] - 0.5 * SERVER_TICK_LENGTH,
-                             fps=BigWorld.getFPS()[1],
+                             fps=int(BigWorld.getFPS()[1]),
                              auto_aim=(player.autoAimVehicle is not None),
                              server_aim=bool(player.gunRotator.settingsCore.getSetting('useServerAim')),
                              vehicle_speed=player.getOwnVehicleSpeeds()[0] * 3.6,
-                             turret_speed=player.gunRotator.turretRotationSpeed,
+                             vehicleRotationSpeed=player.getOwnVehicleSpeeds()[1] * 180 / math.pi,
+                             turret_speed=player.gunRotator.turretRotationSpeed * 180 / math.pi,
                              vehicle_descr=vehicle_descr,
                              chassis_descr=chassis_descr,
                              turret_descr=turret_descr,

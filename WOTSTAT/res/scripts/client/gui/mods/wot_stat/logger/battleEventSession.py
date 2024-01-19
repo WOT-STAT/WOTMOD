@@ -30,7 +30,7 @@ class BattleEventSession:
     self.initURL = init_URL
     self.eventURL = event_URL
     self.send_interval = sendInterval
-    self.arenaID = on_end_load_event.ArenaID
+    self.arenaID = on_end_load_event.arenaID
     self.enable = False
 
     data = json.dumps(on_end_load_event.get_dict())
@@ -56,7 +56,7 @@ class BattleEventSession:
 
   def __send_event_loop(self):
     for event in self.send_queue:
-      event.Token = self.token
+      event.token = self.token
     self.__post_events(self.send_queue)
 
     self.send_queue = []

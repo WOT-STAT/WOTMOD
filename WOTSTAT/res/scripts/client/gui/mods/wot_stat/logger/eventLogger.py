@@ -22,13 +22,13 @@ class EventLogger:
     print_debug('INIT EVENT LOGGER')
 
   def emit_event(self, event, arena_id=None):
-    if event.EventName == Event.NAMES.ON_BATTLE_START:
+    if event.eventName == Event.NAMES.ON_BATTLE_START:
       if self.battle_event_session:
         self.old_battle_event_sessions[self.battle_event_session.arenaID] = self.battle_event_session
       self.battle_event_session = BattleEventSession(config.get('eventURL'), config.get('initBattleURL'), event)
       self.on_session_created(self.battle_event_session)
 
-    elif event.EventName == Event.NAMES.ON_BATTLE_RESULT:
+    elif event.eventName == Event.NAMES.ON_BATTLE_RESULT:
       event_session = None
       if self.battle_event_session.arenaID == arena_id:
         event_session = self.battle_event_session

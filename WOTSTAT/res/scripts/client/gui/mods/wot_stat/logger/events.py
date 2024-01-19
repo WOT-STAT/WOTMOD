@@ -11,53 +11,77 @@ class Event:
     ON_BATTLE_RESULT = 'OnBattleResult'
 
   def __init__(self, event_name):
-    self.date = get_current_date()
+    self.localtime = get_current_date()
     self.eventName = event_name
 
   def get_dict(self):
     return self.__dict__
 
 
-class OnBattleStart(Event):
+class BattleEvent(Event):
+  def __init__(self, event_name, battleTime):
+    Event.__init__(self, event_name)
+    self.battleTime = battleTime
 
-  def __init__(self, arenaTag, arenaId, team, playerName, playerBdid, playerClan, tankTag, tankType, tankLevel,
-               gunTag, startDis, spawnPoint, battleMode, battleGameplay, gameVersion, serverName, region, modVersion,
-               battlePeriod, battleTime, loadTime, preBattleWaitTime, inQueueWaitTime, gameplayMask):
-    Event.__init__(self, Event.NAMES.ON_BATTLE_START)
 
+class DynamicBattleEvent(BattleEvent):
+  def __init__(self, event_name, battleTime):
+    BattleEvent.__init__(self, event_name, battleTime)
+    self.arenaTag = None
+    self.playerName = None
+    self.playerClan = None
+    self.battleMode = None
+    self.battleGameplay = None
+    self.serverName = None
+    self.region = None
+    self.gameVersion = None
+    self.team = None
+    self.tankTag = None
+    self.tankType = None
+    self.tankLevel = None
+    self.gunTag = None
+
+  def setupDynamicBattleInfo(self, arenaTag, playerName, playerClan, battleMode, battleGameplay, serverName, region,
+                             gameVersion, team, tankTag, tankType, tankLevel, gunTag):
     self.arenaTag = arenaTag
-    self.arenaID = arenaId
-    self.team = team
     self.playerName = playerName
-    self.playerBDID = playerBdid
     self.playerClan = playerClan
+    self.battleMode = battleMode
+    self.battleGameplay = battleGameplay
+    self.serverName = serverName
+    self.region = region
+    self.gameVersion = gameVersion
+    self.team = team
     self.tankTag = tankTag
     self.tankType = tankType
     self.tankLevel = tankLevel
     self.gunTag = gunTag
-    self.startDis = startDis
+
+
+class OnBattleStart(DynamicBattleEvent):
+
+  def __init__(self, arenaId, playerDBID, spawnPoint, modVersion, battleTime,
+               battlePeriod, loadTime, preBattleWaitTime, inQueueWaitTime, gameplayMask):
+    DynamicBattleEvent.__init__(self, Event.NAMES.ON_BATTLE_START, battleTime)
+
+    self.arenaID = arenaId
+    self.playerWotID = playerDBID
     self.spawnPoint = spawnPoint
-    self.battleMode = battleMode
-    self.battleGameplay = battleGameplay
-    self.gameVersion = gameVersion
-    self.serverName = serverName
-    self.region = region
     self.modVersion = modVersion
     self.battlePeriod = battlePeriod
-    self.battleTime = battleTime
     self.loadTime = loadTime
     self.preBattleWaitTime = preBattleWaitTime
     self.inQueueWaitTime = inQueueWaitTime
     self.gameplayMask = gameplayMask
 
 
-class OnShot(Event):
+class OnShot(DynamicBattleEvent):
   class HIT_REASON:
     TANK = 'tank'
     TERRAIN = 'terrain'
 
   def __init__(self):
-    Event.__init__(self, Event.NAMES.ON_SHOT)
+    BattleEvent.__init__(self, Event.NAMES.ON_SHOT, 0)
 
     self.battleTime = None
     self.serverMarkerPoint = None
@@ -103,6 +127,7 @@ class OnShot(Event):
 
     self.shellDescr = None
     self.vehicleSpeed = None
+    self.vehicleRotationSpeed = None
     self.turretSpeed = None
 
     self.hitPoint = None
@@ -119,7 +144,8 @@ class OnShot(Event):
 
   def set_shoot(self, gun_position, battle_dispersion, shot_dispersion, shell_name, shell_tag, damage, caliber,
                 piercingPower, speed, maxDistance, shell_descr, ping, fps, auto_aim, server_aim, vehicle_descr,
-                chassis_descr, turret_descr, gun_descr, turret_yaw, turret_pitch, vehicle_speed, turret_speed):
+                chassis_descr, turret_descr, gun_descr, turret_yaw, turret_pitch, vehicle_speed, vehicleRotationSpeed,
+                turret_speed):
     self.gunPoint = gun_position
     self.battleDispersion = battle_dispersion
     self.gunDispersion = shot_dispersion
@@ -133,6 +159,7 @@ class OnShot(Event):
     self.shellDescr = shell_descr
 
     self.vehicleSpeed = vehicle_speed
+    self.vehicleRotationSpeed = vehicleRotationSpeed
     self.turretSpeed = turret_speed
 
     self.ping = ping
@@ -179,27 +206,17 @@ class OnShot(Event):
                          'shotHealth': health,
                          'fireHealth': fireHealth})
 
-  def set_date(self, date=None):
-    if date:
-      self.date = date
-    else:
-      self.date = get_current_date()
-
   def set_battle_time(self, time):
     self.battleTime = time
 
 
 # TODO: Декодировать больше результатов
 class OnBattleResult(Event):
-  def __init__(self, raw=None, result=None, credits=None, xp=None, duration=None, botsCount=None):
+  def __init__(self, raw=None, result=None):
     Event.__init__(self, Event.NAMES.ON_BATTLE_RESULT)
 
     self.raw = raw
     self.result = result
-    self.credits = credits
-    self.xp = xp
-    self.duration = duration
-    self.botsCount = botsCount
 
 
 def get_current_date():

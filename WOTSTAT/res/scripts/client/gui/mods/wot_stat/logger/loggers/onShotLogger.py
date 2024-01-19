@@ -33,7 +33,7 @@ def decode_hit_point(obj, decodedPoints):
 
 def get_full_descr(obj):
   # type: (Vehicle) -> Tuple[Any, Any, Any, Any, Any, Any]
-  descr = obj.vehicleTypeDescriptor
+  descr = obj.typeDescriptor
   yaw, pitch = obj.getServerGunAngles()
   return (descr.type.compactDescr, descr.chassis.compactDescr, descr.turret.compactDescr, descr.gun.compactDescr,
           yaw, pitch)

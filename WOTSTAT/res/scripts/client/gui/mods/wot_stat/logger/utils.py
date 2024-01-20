@@ -5,6 +5,7 @@ from constants import ARENA_BONUS_TYPE, ARENA_GAMEPLAY_NAMES, AUTH_REALM
 from gui.battle_control.battle_constants import FEEDBACK_EVENT_ID
 from vehicle_systems.tankStructure import TankPartNames
 from account_shared import readClientServerVersion
+from ..load_mod import config
 
 
 def vector(t): return {'x': t.x, 'y': t.y, 'z': t.z} if t else None
@@ -59,11 +60,13 @@ def setup_dynamic_battle_info(dynamicBattleEvent):
     arenaTag=player.arena.arenaType.geometry,
     playerName=player.name,
     playerClan=player.arena.vehicles[player.playerVehicleID]['clanAbbrev'],
+    accountDBID=player.arena.vehicles[player.playerVehicleID]['accountDBID'],
     battleMode=ARENA_TAGS[player.arena.bonusType],
     battleGameplay=ARENA_GAMEPLAY_NAMES[player.arenaTypeID >> 16],
     serverName=player.connectionMgr.serverUserName,
     region=AUTH_REALM,
     gameVersion=GAME_VERSION,
+    modVersion=config.get('version'),
     team=player.team,
     tankTag=BigWorld.entities[BigWorld.player().playerVehicleID].typeDescriptor.name,
     tankType=short_tank_type(get_tank_type(player.vehicleTypeDescriptor.type.tags)),

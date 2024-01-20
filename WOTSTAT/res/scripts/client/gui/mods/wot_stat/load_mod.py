@@ -26,7 +26,7 @@ def init_mod():
   print_log('version ' + config.get('version'))
 
   update_game_version(mod_name())
-  update_mod_version('https://dev.wotstat.soprachev.com/api/modnotification/version', 'mod.wotStat',
+  update_mod_version(config.get('updateURL'), 'mod.wotStat',
                      config.get('version'),
                      on_start_update=lambda t: print_log(
                        'Found new mod version ' + t),

@@ -9,7 +9,8 @@ class Config:
   defaultParams = {
     'version': '0.0.0.0',
     'initBattleURL': 'https://dev.wotstat.soprachev.com/api/events/OnBattleStart',
-    'eventURL': 'https://dev.wotstat.soprachev.com/api/events/send'
+    'eventURL': 'https://dev.wotstat.soprachev.com/api/events/send',
+    'updateURL': 'https://api.github.com/repos/WOT-STAT/WOTMOD/releases/latest',
   }
 
   def __init__(self, ConfigPath, DefaultParams=None):

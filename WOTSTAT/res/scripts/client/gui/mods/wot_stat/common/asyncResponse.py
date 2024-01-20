@@ -9,37 +9,41 @@ json_headers = {'Content-type': 'application/json',
                 'Accept': 'application/json'}
 
 
-def get_async(url, data=None, callback=None):
-  request_async(url, data, get, callback)
+def get_async(url, data=None, callback=None, headers=None):
+  request_async(url, data, headers, get, callback)
 
 
-def post_async(url, data=None, callback=None):
-  request_async(url, data, post, callback)
+def post_async(url, data=None, callback=None, headers=None):
+  request_async(url, data, headers, post, callback)
 
 
-def request_async(url, data, method, callback):
+def request_async(url, data, headers, method, callback):
   event = threading.Event()
   runner = threading.Thread(target=run,
-                            args=(event, url, data, method, callback))
+                            args=(event, url, data, headers, method, callback))
   runner.start()
   event.wait()
 
 
-def run(event, url, data, method, callback):
+def run(event, url, data, headers, method, callback):
   event.set()
-  result = method(url, data)
+  result = method(url, data, headers)
   if callback:
     callback(result)
 
 
-def get(url, data):
+def get(url, data, headers):
   if data:
     params = urllib2.urlencode(data)
     url = '?'.join(url, params)
-  return urllib2.urlopen(url, context=context).read()
+  if headers:
+    req = urllib2.Request(url, headers=headers)
+    return urllib2.urlopen(req, context=context).read()
+  else:
+    return urllib2.urlopen(url, context=context).read()
 
 
-def post(url, data):
+def post(url, data, headers):
   if data:
     req = urllib2.Request(url, data, headers=json_headers)
     return urllib2.urlopen(req, context=context).read()

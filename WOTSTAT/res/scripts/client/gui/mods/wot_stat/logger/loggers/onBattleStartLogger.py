@@ -8,7 +8,6 @@ from ..eventLogger import eventLogger, battle_time
 from ..events import OnBattleStart
 from ..utils import vector, setup_dynamic_battle_info
 from ..wotHookEvents import wotHookEvents
-from ...load_mod import config
 from ...utils import print_log, print_debug
 
 
@@ -72,9 +71,7 @@ class OnBattleStartLogger:
 
     player.enableServerAim(True)
     onBattleStart = OnBattleStart(arenaId=player.arenaUniqueID,
-                                  playerDBID=player.arena.vehicles[player.playerVehicleID]['accountDBID'],
                                   spawnPoint=vector(player.getOwnVehiclePosition()),
-                                  modVersion=config.get('version'),
                                   battlePeriod=ARENA_PERIOD_NAMES[player.arena.period],
                                   battleTime=battle_time(),
                                   loadTime=self.on_end_load_time - self.on_enter_world_time,

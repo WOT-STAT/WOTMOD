@@ -30,27 +30,31 @@ class DynamicBattleEvent(BattleEvent):
     self.arenaTag = None
     self.playerName = None
     self.playerClan = None
+    self.accountDBID = None
     self.battleMode = None
     self.battleGameplay = None
     self.serverName = None
     self.region = None
     self.gameVersion = None
+    self.modVersion = None
     self.team = None
     self.tankTag = None
     self.tankType = None
     self.tankLevel = None
     self.gunTag = None
 
-  def setupDynamicBattleInfo(self, arenaTag, playerName, playerClan, battleMode, battleGameplay, serverName, region,
-                             gameVersion, team, tankTag, tankType, tankLevel, gunTag):
+  def setupDynamicBattleInfo(self, arenaTag, playerName, playerClan, accountDBID, battleMode, battleGameplay,
+                             serverName, region, gameVersion, modVersion, team, tankTag, tankType, tankLevel, gunTag):
     self.arenaTag = arenaTag
     self.playerName = playerName
     self.playerClan = playerClan
+    self.accountDBID = accountDBID
     self.battleMode = battleMode
     self.battleGameplay = battleGameplay
     self.serverName = serverName
     self.region = region
     self.gameVersion = gameVersion
+    self.modVersion = modVersion
     self.team = team
     self.tankTag = tankTag
     self.tankType = tankType
@@ -60,14 +64,12 @@ class DynamicBattleEvent(BattleEvent):
 
 class OnBattleStart(DynamicBattleEvent):
 
-  def __init__(self, arenaId, playerDBID, spawnPoint, modVersion, battleTime,
+  def __init__(self, arenaId, spawnPoint, battleTime,
                battlePeriod, loadTime, preBattleWaitTime, inQueueWaitTime, gameplayMask):
     DynamicBattleEvent.__init__(self, Event.NAMES.ON_BATTLE_START, battleTime)
 
     self.arenaID = arenaId
-    self.playerWotID = playerDBID
     self.spawnPoint = spawnPoint
-    self.modVersion = modVersion
     self.battlePeriod = battlePeriod
     self.loadTime = loadTime
     self.preBattleWaitTime = preBattleWaitTime

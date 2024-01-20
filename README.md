@@ -1,14 +1,14 @@
 # WOTMOD
 ## Общая информация
 Этот репозиторий содержит всё необходимое для разработки мода для танков.
-* WGMods: https://wgmods.net/5652/
+* WGMods: https://wgmods.net/5652/ (**УСТАРЕЛО**)
 
 
 ## Мод
 От релизной версии он отличается файлом wot_stat/common/crypto.py, сейчас в нём расположена заглушка, релизная версия кодирует отправляемый на сервер json, дабы усложнить жизнь желающим заспамить сервер фейковыми сообщениями.
 
 ### Компиляция 
-На Unix системах `./WOTSTAT/build.sh -v 1.0.0.0`
+На Unix системах `./WOTSTAT/build.sh -v 1.0.0.0-a.1`
 
 ## Структура
 [Логгеры](WOTSTAT/res/scripts/client/gui/mods/wot_stat/logger/loggers) создают события [events](WOTSTAT/res/scripts/client/gui/mods/wot_stat/logger/events.py) и добавляют их в [eventLogger](WOTSTAT/res/scripts/client/gui/mods/wot_stat/logger/eventLogger.py), который хранит и добавляет в нужную игровую сессию [battleEventSession](WOTSTAT/res/scripts/client/gui/mods/wot_stat/logger/battleEventSession.py) это событие.

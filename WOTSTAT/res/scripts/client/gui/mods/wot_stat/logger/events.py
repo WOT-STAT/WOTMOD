@@ -98,6 +98,7 @@ class OnShot(DynamicBattleEvent):
     self.shellTag = None
     self.shellName = None
     self.shellDamage = None
+    self.damageRandomization = None
     self.shellCaliber = None
     self.shellPiercingPower = None
     self.shellSpeed = None
@@ -144,16 +145,17 @@ class OnShot(DynamicBattleEvent):
     self.serverMarkerPoint = position
     self.serverShotDispersion = dispersion
 
-  def set_shoot(self, gun_position, battle_dispersion, shot_dispersion, shell_name, shell_tag, damage, caliber,
-                piercingPower, speed, maxDistance, shell_descr, ping, fps, auto_aim, server_aim, vehicle_descr,
-                chassis_descr, turret_descr, gun_descr, turret_yaw, turret_pitch, vehicle_speed, vehicleRotationSpeed,
-                turret_speed):
+  def set_shoot(self, gun_position, battle_dispersion, shot_dispersion, shell_name, shell_tag, damage,
+                damageRandomization, caliber, piercingPower, speed, maxDistance, shell_descr, ping, fps, auto_aim,
+                server_aim, vehicle_descr, chassis_descr, turret_descr, gun_descr, turret_yaw, turret_pitch,
+                vehicle_speed, vehicleRotationSpeed, turret_speed):
     self.gunPoint = gun_position
     self.battleDispersion = battle_dispersion
     self.gunDispersion = shot_dispersion
     self.shellTag = shell_tag
     self.shellName = shell_name
     self.shellDamage = damage
+    self.damageRandomization = damageRandomization
     self.shellCaliber = caliber
     self.shellPiercingPower = piercingPower
     self.shellSpeed = speed

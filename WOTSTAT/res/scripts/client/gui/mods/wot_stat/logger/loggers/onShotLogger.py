@@ -39,10 +39,6 @@ def get_full_descr(obj):
           yaw, pitch)
 
 
-def avg(items):
-  return sum(items) * 1.0 / len(items)
-
-
 class OnShotLogger:
 
   def __init__(self):
@@ -168,9 +164,10 @@ class OnShotLogger:
                                  player._PlayerAvatar__aimingInfo[2]),
                              shell_name=player.vehicleTypeDescriptor.shot.shell.name,
                              shell_tag=player.vehicleTypeDescriptor.shot.shell.kind,
-                             damage=avg(shot.shell.damage),
+                             damage=shot.shell.damage[0],
+                             damageRandomization=shot.shell.damageRandomization,
                              caliber=shot.shell.caliber,
-                             piercingPower=avg(shot.piercingPower),
+                             piercingPower=shot.piercingPower[0],
                              speed=shot.speed / 0.8,
                              maxDistance=shot.maxDistance,
                              shell_descr=shot.shell.compactDescr,

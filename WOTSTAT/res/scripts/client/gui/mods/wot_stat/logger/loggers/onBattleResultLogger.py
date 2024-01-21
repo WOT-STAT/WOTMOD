@@ -100,8 +100,12 @@ class OnBattleResultLogger:
           'tankLevel': veWG.level,
           'tankTag': veWG.name,
           'tankType': short_tank_type(veWG.classTag),
+          'maxHealth': vehicle['maxHealth'],
+          'health': vehicle['health'],
+          'isAlive': vehicle['health'] > 0
         }
 
+      indexById = {}
       for vehicleId in vehicles:
         vehicle = vehicles[vehicleId][0]
         bdid = vehicle['accountDBID']
@@ -111,16 +115,24 @@ class OnBattleResultLogger:
           'name': player['realName'],
           'bdid': bdid,
           'team': player['team'],
-          'xp': vehicle['xp']
+          'xp': vehicle['xp'],
+          '__id': vehicleId
         }
         res.update(getVehicleInfo(vehicle))
         playersResultList.append(res)
+        indexById[vehicleId] = len(playersResultList)
+
+      for result in playersResultList:
+        killerId = vehicles[result.pop('__id')]['killerID']
+        result['killerIndex'] = indexById[killerId] if killerId in indexById else -1
 
       avatar = results['personal']['avatar']
       personalRes = results['personal'].items()[0][1]
+      killerId = personalRes['killerID']
       personal = {
         'team': avatar['team'],
-        'xp': personalRes['originalXP']
+        'xp': personalRes['originalXP'],
+        'killerIndex': indexById[killerId] if killerId in indexById else -1
       }
 
       personal.update(getVehicleInfo(personalRes))

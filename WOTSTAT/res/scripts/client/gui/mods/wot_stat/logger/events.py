@@ -90,6 +90,7 @@ class OnShot(DynamicBattleEvent):
     self.clientMarkerPoint = None
     self.serverShotDispersion = None
     self.clientShotDispersion = None
+    self.health = None
 
     self.shotId = None
     self.gunPoint = None
@@ -145,11 +146,12 @@ class OnShot(DynamicBattleEvent):
     self.serverMarkerPoint = position
     self.serverShotDispersion = dispersion
 
-  def set_shoot(self, gun_position, battle_dispersion, shot_dispersion, shell_name, shell_tag, damage,
+  def set_shoot(self, gun_position, health, battle_dispersion, shot_dispersion, shell_name, shell_tag, damage,
                 damageRandomization, caliber, piercingPower, speed, maxDistance, shell_descr, ping, fps, auto_aim,
                 server_aim, vehicle_descr, chassis_descr, turret_descr, gun_descr, turret_yaw, turret_pitch,
                 vehicle_speed, vehicleRotationSpeed, turret_speed):
     self.gunPoint = gun_position
+    self.health = health
     self.battleDispersion = battle_dispersion
     self.gunDispersion = shot_dispersion
     self.shellTag = shell_tag

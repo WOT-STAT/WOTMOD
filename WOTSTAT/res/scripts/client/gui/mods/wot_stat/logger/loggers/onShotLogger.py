@@ -155,9 +155,10 @@ class OnShotLogger:
     setup_dynamic_battle_info(self.temp_shot)
     shot = player.vehicleTypeDescriptor.shot
 
-    vehicle_descr, chassis_descr, turret_descr, gun_descr, yaw, pitch = get_full_descr(
-      player.vehicle if player.vehicle else self.cachedVehicle)
+    playerVehicle = player.vehicle if player.vehicle else self.cachedVehicle
+    vehicle_descr, chassis_descr, turret_descr, gun_descr, yaw, pitch = get_full_descr(playerVehicle)
     self.temp_shot.set_shoot(gun_position=vector(own_gun_position(player)),
+                             health=playerVehicle.health,
                              battle_dispersion=player.vehicleTypeDescriptor.gun.shotDispersionAngle,
                              shot_dispersion=(
                                  player.vehicleTypeDescriptor.gun.shotDispersionAngle *
@@ -209,7 +210,9 @@ class OnShotLogger:
       vehicleID = r & mask
       flags = r >> 32 & mask
 
-      shotEventCollector.shot_result(vehicleID, flags)
+      vehicle = BigWorld.entities.get(vehicleID)
+      health = vehicle.health if vehicle else None
+      shotEventCollector.shot_result(vehicleID, flags, health)
 
   def on_health_changed(self, obj, newHealth, oldHealth, attackerID, attackReasonID):
     if attackerID == BigWorld.player().playerVehicleID and BigWorld.player().arena.vehicles[obj.id][

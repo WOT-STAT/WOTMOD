@@ -57,7 +57,7 @@ class ShotEventCollector:
       data = event.data
       res = False
       if event.type == ShotEventCollector.Event.SHOT_RESULT:
-        res = self._shot_result(data.get('vehicleID'), data.get('flags'))
+        res = self._shot_result(data.get('vehicleID'), data.get('flags'), data.get('health'))
       elif event.type == ShotEventCollector.Event.SHOT_DAMAGE:
         res = self._shot_damage(data.get('vehicleID'), data.get('newHealth'), data.get('oldHealth'))
       elif event.type == ShotEventCollector.Event.TANK_HIT:
@@ -99,7 +99,7 @@ class ShotEventCollector:
 
       return False
 
-    def _shot_result(self, vehicleID, flags):
+    def _shot_result(self, vehicleID, flags, health):
 
       def add_result():
         self.vehicle_result[vehicleID] = flags
@@ -111,6 +111,9 @@ class ShotEventCollector:
             self.vehicle_wait_killed_damage.append(vehicleID)
           else:
             self.vehicle_wait_damage.append(vehicleID)
+        else:
+          print_debug("NOT PIERCED")
+          self.damages.append({'vehicleID': vehicleID, 'newHealth': health, 'damage': 0, 'ammo_bay_destr': False})
         return True
 
       after_ricochet = bool(flags & VHF.ATTACK_IS_RICOCHET_PROJECTILE)
@@ -321,26 +324,26 @@ class ShotEventCollector:
     self.append_event(ShotEventCollector.Event(ShotEventCollector.Event.TANK_HIT,
                                                {'vehicleID': vehicleID, 'point': point, 'extra': extra}))
 
-  def shot_result(self, vehicleID, flags):
+  def shot_result(self, vehicleID, flags, health):
     print_debug(
       '[shot_result] vehicle: %s; direct: %s; ricochet: %s; damage: %s; crits: %s; kill: %s; fire: %s; flags: %d' % (
-      vehicleID,
-      not bool(
-        flags & VHF.ATTACK_IS_RICOCHET_PROJECTILE),
-      bool(
-        flags & VHF.RICOCHET),
-      bool(flags & (VHF.MATERIAL_WITH_POSITIVE_DF_PIERCED_BY_PROJECTILE |
-                    VHF.MATERIAL_WITH_POSITIVE_DF_PIERCED_BY_EXPLOSION)),
-      bool(
-        flags & (VHF.DEVICE_PIERCED_BY_PROJECTILE | VHF.DEVICE_PIERCED_BY_EXPLOSION)),
-      bool(
-        flags & VHF.VEHICLE_KILLED),
-      bool(
-        flags & VHF.FIRE_STARTED),
-      flags
+        vehicleID,
+        not bool(
+          flags & VHF.ATTACK_IS_RICOCHET_PROJECTILE),
+        bool(
+          flags & VHF.RICOCHET),
+        bool(flags & (VHF.MATERIAL_WITH_POSITIVE_DF_PIERCED_BY_PROJECTILE |
+                      VHF.MATERIAL_WITH_POSITIVE_DF_PIERCED_BY_EXPLOSION)),
+        bool(
+          flags & (VHF.DEVICE_PIERCED_BY_PROJECTILE | VHF.DEVICE_PIERCED_BY_EXPLOSION)),
+        bool(
+          flags & VHF.VEHICLE_KILLED),
+        bool(
+          flags & VHF.FIRE_STARTED),
+        flags
       ))
     self.append_event(ShotEventCollector.Event(ShotEventCollector.Event.SHOT_RESULT,
-                                               {'vehicleID': vehicleID, 'flags': flags}))
+                                               {'vehicleID': vehicleID, 'flags': flags, 'health': health}))
 
   def shot_damage(self, vehicleID, newHealth, oldHealth):
     print_debug('[shot_damage] vehicle: %s; damage: %s; kill: %s; ammo_bay_destr: %s; newHealth: %s; oldHealth: %s' % (

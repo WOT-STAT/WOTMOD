@@ -101,7 +101,7 @@ class OnBattleResultLogger:
           'tankTag': veWG.name,
           'tankType': short_tank_type(veWG.classTag),
           'maxHealth': vehicle['maxHealth'],
-          'health': vehicle['health'],
+          'health': max(0, vehicle['health']),
           'isAlive': vehicle['health'] > 0
         }
 
@@ -116,14 +116,15 @@ class OnBattleResultLogger:
           'bdid': bdid,
           'team': player['team'],
           'xp': vehicle['xp'],
-          '__id': vehicleId
+          '__vehicleId': vehicleId
         }
         res.update(getVehicleInfo(vehicle))
         playersResultList.append(res)
         indexById[vehicleId] = len(playersResultList)
 
       for result in playersResultList:
-        killerId = vehicles[result.pop('__id')]['killerID']
+        resultID = result.pop('__vehicleId')
+        killerId = vehicles[resultID][0]['killerID']
         result['killerIndex'] = indexById[killerId] if killerId in indexById else -1
 
       avatar = results['personal']['avatar']
@@ -149,6 +150,7 @@ class OnBattleResultLogger:
 
     except Exception, e:
       print_log('cannot decode battle result\n' + str(e))
+      print(e)
 
     battleEvent.set_result(result=decodeResult, raw=str(results))
     eventLogger.emit_event(battleEvent, arena_id=arenaID)

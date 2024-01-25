@@ -93,7 +93,8 @@ class OnShotLogger:
         if r['tracer_end_point']: onShot.set_tracer_end(vector(r['tracer_end_point']))
         if r['tank_hit_extra']:
           vehicle_descr, chassis_descr, turret_descr, gun_descr, yaw, pitch, segment = r['tank_hit_extra']
-          onShot.set_hit_extra(vehicle_descr, chassis_descr, turret_descr, gun_descr, yaw, pitch, str(segment))
+          onShot.set_hit_extra(vehicle_descr, chassis_descr, turret_descr, gun_descr, yaw, pitch,
+                               str(segment))
 
         def acc(a, v):
           a[v['vehicleID']] = v
@@ -162,7 +163,7 @@ class OnShotLogger:
                              battle_dispersion=player.vehicleTypeDescriptor.gun.shotDispersionAngle,
                              shot_dispersion=(
                                  player.vehicleTypeDescriptor.gun.shotDispersionAngle *
-                                 player._PlayerAvatar__aimingInfo[2]),
+                                 player._PlayerAvatar__dispersionInfo[0]),
                              shell_name=player.vehicleTypeDescriptor.shot.shell.name,
                              shell_tag=player.vehicleTypeDescriptor.shot.shell.kind,
                              damage=shot.shell.damage[0],

@@ -8,8 +8,8 @@ class Config:
   config = {}
   defaultParams = {
     'version': '0.0.0.0',
-    'initBattleURL': 'https://dev.wotstat.soprachev.com/api/events/OnBattleStart',
-    'eventURL': 'https://dev.wotstat.soprachev.com/api/events/send',
+    'initBattleURL': 'https://wotstat.info/api/events/OnBattleStart',
+    'eventURL': 'https://wotstat.info/api/events/send',
     'updateURL': 'https://api.github.com/repos/WOT-STAT/WOTMOD/releases/latest',
   }
 

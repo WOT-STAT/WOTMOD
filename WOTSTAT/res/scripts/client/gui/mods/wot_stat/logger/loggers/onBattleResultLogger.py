@@ -73,6 +73,15 @@ class OnBattleResultLogger:
       vehicles = results['vehicles']
       playersResultList = list()
 
+      squadStorage = dict()
+      squadCount = 0
+      for playerID in players:
+        squadID = players[playerID]['prebattleID']
+        if squadID != 0 and squadID not in squadStorage:
+          squadCount += 1
+          squadStorage[squadID] = squadCount
+
+
       def getVehicleInfo(vehicle):
         veWG = vehiclesWG.getVehicleType(vehicle['typeCompDescr'])
         return {
@@ -111,8 +120,10 @@ class OnBattleResultLogger:
         bdid = vehicle['accountDBID']
         if bdid not in players: continue
         player = players[bdid]
+        squadID = player['prebattleID']
         res = {
           'name': player['realName'],
+          'squadID': squadStorage[squadID] if squadID in squadStorage else 0,
           'bdid': bdid,
           'team': player['team'],
           'xp': vehicle['xp'],
@@ -130,10 +141,12 @@ class OnBattleResultLogger:
       avatar = results['personal']['avatar']
       personalRes = results['personal'].items()[0][1]
       killerId = personalRes['killerID']
+      squadID = players[avatar['accountDBID']]['prebattleID']
       personal = {
         'team': avatar['team'],
         'xp': personalRes['originalXP'],
-        'killerIndex': indexById[killerId] if killerId in indexById else -1
+        'killerIndex': indexById[killerId] if killerId in indexById else -1,
+        'squadID': squadStorage[squadID] if squadID in squadStorage else 0,
       }
 
       personal.update(getVehicleInfo(personalRes))

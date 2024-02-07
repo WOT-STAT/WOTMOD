@@ -2,6 +2,7 @@ import BigWorld
 
 from Avatar import PlayerAvatar
 from VehicleGunRotator import VehicleGunRotator
+from gui.Scaleform.daapi.view.lobby.battle_queue import BattleQueue, BattleStrongholdsQueue
 from ProjectileMover import ProjectileMover
 from Vehicle import Vehicle
 import Event
@@ -13,6 +14,7 @@ class WotHookEvents:
   def __init__(self):
     self.listeners = {}
     # ------------------INIT------------------#
+    self.BattleQueue_populate = Event.Event()
     self.PlayerAvatar_onEnterWorld = Event.Event()
     self.PlayerAvatar_updateTargetingInfo = Event.Event()
     self.PlayerAvatar_onArenaPeriodChange = Event.Event()
@@ -38,6 +40,11 @@ wotHookEvents = WotHookEvents()
 
 
 # ------------------INIT------------------#
+
+@g_overrideLib.registerEvent(BattleQueue, '_populate')
+def queuePopulate(self, *a, **k):
+  wotHookEvents.BattleQueue_populate(self, *a, **k)
+
 
 @g_overrideLib.registerEvent(PlayerAvatar, 'onEnterWorld')
 def onEnterWorld(self, *a, **k):

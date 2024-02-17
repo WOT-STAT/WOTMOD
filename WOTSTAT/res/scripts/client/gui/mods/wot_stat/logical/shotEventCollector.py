@@ -113,7 +113,8 @@ class ShotEventCollector:
             self.vehicle_wait_damage.append(vehicleID)
         else:
           print_debug("NOT PIERCED")
-          self.damages.append({'vehicleID': vehicleID, 'newHealth': health, 'damage': 0, 'ammo_bay_destr': False})
+          self.damages.append(
+            {'vehicleID': vehicleID, 'newHealth': max(0, health), 'damage': 0, 'ammo_bay_destr': False})
         return True
 
       after_ricochet = bool(flags & VHF.ATTACK_IS_RICOCHET_PROJECTILE)

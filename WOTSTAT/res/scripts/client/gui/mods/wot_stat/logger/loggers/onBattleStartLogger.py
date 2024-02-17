@@ -23,9 +23,9 @@ class OnBattleStartLogger:
     wotHookEvents.PlayerAvatar_onEnterWorld += self.on_enter_world
     wotHookEvents.PlayerAvatar_updateTargetingInfo += self.update_targeting_info
     wotHookEvents.PlayerAvatar_onArenaPeriodChange += self.on_arena_period_change
-    wotHookEvents.BattleQueue_populate += self.onEnqueued
+    wotHookEvents.BattleQueue_populate += self.on_enqueued
 
-  def onEnqueued(self, obj, *a, **k):
+  def on_enqueued(self, obj, *a, **k):
     print_debug('OnBattleStartLogger.on_enqueued')
     self.on_enter_queue_time = BigWorld.serverTime()
 

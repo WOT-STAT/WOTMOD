@@ -1,8 +1,9 @@
 import BigWorld
 
 from Avatar import PlayerAvatar
+from Account import Account
 from VehicleGunRotator import VehicleGunRotator
-from gui.Scaleform.daapi.view.lobby.battle_queue import BattleQueue, BattleStrongholdsQueue
+from gui.Scaleform.daapi.view.lobby.battle_queue import BattleQueue
 from ProjectileMover import ProjectileMover
 from Vehicle import Vehicle
 import Event
@@ -14,6 +15,7 @@ class WotHookEvents:
   def __init__(self):
     self.listeners = {}
     # ------------------INIT------------------#
+    self.Account_onBecomePlayer = Event.Event()
     self.BattleQueue_populate = Event.Event()
     self.PlayerAvatar_onEnterWorld = Event.Event()
     self.PlayerAvatar_updateTargetingInfo = Event.Event()
@@ -21,6 +23,7 @@ class WotHookEvents:
     # -------------------MOVE------------------#
     self.VehicleGunRotator_setShotPosition = Event.Event()
     self.VehicleGunRotator_updateGunMarker = Event.Event()
+    self.PlayerAvatar_updateGunMarker = Event.Event()
     # -------------------SHOT------------------#
     self.PlayerAvatar_shoot = Event.Event()
     self.PlayerAvatar_showTracer = Event.Event()
@@ -40,6 +43,11 @@ wotHookEvents = WotHookEvents()
 
 
 # ------------------INIT------------------#
+
+@g_overrideLib.registerEvent(Account, 'onBecomePlayer')
+def queuePopulate(self, *a, **k):
+  wotHookEvents.Account_onBecomePlayer(self, *a, **k)
+
 
 @g_overrideLib.registerEvent(BattleQueue, '_populate')
 def queuePopulate(self, *a, **k):
@@ -73,9 +81,14 @@ def updateGunMarker(self, *a, **k):
   wotHookEvents.VehicleGunRotator_updateGunMarker(self, *a, **k)
 
 
+@g_overrideLib.registerEvent(PlayerAvatar, 'updateGunMarker')
+def PlayerAvatar_updateGunMarker(self, *a, **k):
+  wotHookEvents.PlayerAvatar_updateGunMarker(self, *a, **k)
+
+
 # -------------------SHOT------------------#
 
-@g_overrideLib.registerEvent(PlayerAvatar, 'shoot')
+@g_overrideLib.registerEvent(PlayerAvatar, 'shoot', prepend=True)
 def shoot(self, *a, **k):
   wotHookEvents.PlayerAvatar_shoot(self, *a, **k)
 

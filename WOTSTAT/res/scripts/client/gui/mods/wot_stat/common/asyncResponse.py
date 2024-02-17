@@ -8,27 +8,33 @@ json_headers = {'Content-type': 'application/json',
                 'Accept': 'application/json'}
 
 
-def get_async(url, data=None, callback=None, headers=None):
-  request_async(url, data, headers, get, callback)
+def get_async(url, data=None, callback=None, headers=None, error_callback=None):
+  request_async(url, data, headers, get, callback, error_callback)
 
 
-def post_async(url, data=None, callback=None, headers=None):
-  request_async(url, data, headers, post, callback)
+def post_async(url, data=None, callback=None, headers=None, error_callback=None):
+  request_async(url, data, headers, post, callback, error_callback)
 
 
-def request_async(url, data, headers, method, callback):
+def request_async(url, data, headers, method, callback, error_callback=None):
   event = threading.Event()
   runner = threading.Thread(target=run,
-                            args=(event, url, data, headers, method, callback))
+                            args=(event, url, data, headers, method, callback, error_callback))
   runner.start()
   event.wait()
 
 
-def run(event, url, data, headers, method, callback):
+def run(event, url, data, headers, method, callback, error_callback):
   event.set()
-  result = method(url, data, headers)
-  if callback:
-    callback(result)
+  try:
+    result = method(url, data, headers)
+    if callback:
+      callback(result)
+  except Exception, e:
+    if error_callback:
+      error_callback(e)
+    else:
+      raise e
 
 
 def get(url, data, headers):

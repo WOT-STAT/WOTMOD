@@ -35,7 +35,8 @@ def update_game_version(full_mod_name):
 GH_headers = {'X-GitHub-Api-Version': '2022-11-28',
               'Accept': 'application/vnd.github+json'}
 
-def update_mod_version(url, mod_name, current_version, on_start_update=None, on_updated=None):
+
+def update_mod_version(url, mod_name, current_version, on_start_update=None, on_updated=None, on_success_check=None):
   latest_version = ''
 
   def end_load_mod(res):
@@ -57,7 +58,9 @@ def update_mod_version(url, mod_name, current_version, on_start_update=None, on_
     data = json.loads(res)
     latest_version = data['tag_name']
     print_log('detect latest version: ' + latest_version)
-    if current_version == latest_version: return
+    if current_version == latest_version:
+      if on_success_check: on_success_check()
+      return
 
     assets = data['assets']
     asset = filter(lambda x: ('name' in x) and (x['name'] == 'mod.wotStat_' + latest_version + '.wotmod'), assets)

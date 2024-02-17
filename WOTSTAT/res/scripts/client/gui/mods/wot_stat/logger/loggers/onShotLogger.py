@@ -1,5 +1,6 @@
 import BigWorld
 import math
+
 from Math import Matrix
 from Vehicle import Vehicle
 from VehicleEffects import DamageFromShotDecoder
@@ -11,7 +12,6 @@ from ..utils import vector, own_gun_position, setup_dynamic_battle_info
 from ..wotHookEvents import wotHookEvents
 from ...utils import print_debug, print_log
 from ...logical.shotEventCollector import shotEventCollector
-from account_helpers.settings_core.settings_constants import GAME
 
 
 def own_effect_index(player):
@@ -121,6 +121,11 @@ class OnShotLogger:
                               fire_damage['ammo_bay_destr'] if fire_damage else False),
                             health=damage['newHealth'] if damage else None,
                             fireHealth=fire_damage['newHealth'] if fire_damage else None)
+
+        if not onShot.accountDBID:
+          print_log('SHOT IS NOT INIT. ERROR')
+          continue
+
         eventLogger.emit_event(onShot)
 
         log = ""

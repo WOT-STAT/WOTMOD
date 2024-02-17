@@ -327,22 +327,20 @@ class ShotEventCollector:
 
   def shot_result(self, vehicleID, flags, health):
     print_debug(
-      '[shot_result] vehicle: %s; direct: %s; ricochet: %s; damage: %s; crits: %s; kill: %s; fire: %s; flags: %d' % (
+      '[shot_result] vehicle: %s; isDead: %s, direct: %s; ricochet: %s; damage: %s; crits: %s; kill: %s; fire: %s; flags: %d' % (
         vehicleID,
-        not bool(
-          flags & VHF.ATTACK_IS_RICOCHET_PROJECTILE),
-        bool(
-          flags & VHF.RICOCHET),
+        not bool(flags & VHF.VEHICLE_WAS_DEAD_BEFORE_ATTACK),
+        not bool(flags & VHF.ATTACK_IS_RICOCHET_PROJECTILE),
+        bool(flags & VHF.RICOCHET),
         bool(flags & (VHF.MATERIAL_WITH_POSITIVE_DF_PIERCED_BY_PROJECTILE |
                       VHF.MATERIAL_WITH_POSITIVE_DF_PIERCED_BY_EXPLOSION)),
-        bool(
-          flags & (VHF.DEVICE_PIERCED_BY_PROJECTILE | VHF.DEVICE_PIERCED_BY_EXPLOSION)),
-        bool(
-          flags & VHF.VEHICLE_KILLED),
-        bool(
-          flags & VHF.FIRE_STARTED),
+        bool(flags & (VHF.DEVICE_PIERCED_BY_PROJECTILE | VHF.DEVICE_PIERCED_BY_EXPLOSION)),
+        bool(flags & VHF.VEHICLE_KILLED),
+        bool(flags & VHF.FIRE_STARTED),
         flags
       ))
+
+    if flags & VHF.VEHICLE_WAS_DEAD_BEFORE_ATTACK: return
     self.append_event(ShotEventCollector.Event(ShotEventCollector.Event.SHOT_RESULT,
                                                {'vehicleID': vehicleID, 'flags': flags, 'health': health}))
 

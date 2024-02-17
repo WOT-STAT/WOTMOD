@@ -9,6 +9,7 @@ from .common.modNotification import show_notification, OPEN_PERSONAL_WOTSTAT_EVE
 from .common.asyncResponse import get_async
 from .utils import print_log
 
+
 configPath = './mods/configs/wot_stat/config.cfg'
 config = Config(configPath)  # type: Config
 from .logger.eventLogger import eventLogger
@@ -16,7 +17,7 @@ from .logger.wotHookEvents import wotHookEvents
 
 is_success_check = None
 api_server_time = None
-is_account_logined = False
+is_account_logged_in = False
 
 
 def mod_name_version(version):
@@ -64,15 +65,28 @@ def on_status_check_fail(e):
 
 
 def on_account_login(*a, **k):
-  global is_account_logined
-  is_account_logined = True
-  wotHookEvents.Account_onBecomePlayer -= on_account_login
+  global is_account_logged_in
+  is_account_logged_in = True
   hello_message()
+  wotHookEvents.Account_onBecomePlayer -= on_account_login
+
+
+def on_connected(*a, **k):
+  global is_account_logged_in
+  if not BigWorld.player():
+    wotHookEvents.Account_onBecomePlayer += on_account_login
+    is_account_logged_in = False
+  else:
+    hello_message()
 
 
 def hello_message():
-  global api_server_time, is_success_check
-  if (api_server_time is None) or (is_success_check != True) or (is_account_logined != True): return
+  global api_server_time, is_success_check, is_account_logged_in
+  if (api_server_time is None) or (is_success_check != True) or (is_account_logged_in != True): return
+
+  if not BigWorld.player():
+    is_account_logged_in = False
+    return
 
   target_url = 'wotstat.info/session?mode=any&nickname=%s&from=%s' % (BigWorld.player().name, api_server_time)
   print_log(target_url)
@@ -96,4 +110,4 @@ def init_mod():
                      on_success_check=on_success_check)
 
 
-wotHookEvents.Account_onBecomePlayer += on_account_login
+wotHookEvents.onConnected += on_connected

@@ -216,7 +216,6 @@ class OnShot(DynamicBattleEvent):
     self.battleTime = time
 
 
-# TODO: Декодировать больше результатов
 class OnBattleResult(DynamicBattleEvent):
   raw = None
   result = None

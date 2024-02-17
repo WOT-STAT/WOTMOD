@@ -1,4 +1,5 @@
 import BigWorld
+import re
 from BattleFeedbackCommon import BATTLE_EVENT_TYPE
 
 from constants import ARENA_BONUS_TYPE, ARENA_GAMEPLAY_NAMES, AUTH_REALM
@@ -56,6 +57,10 @@ def setup_dynamic_battle_info(dynamicBattleEvent):
   @type dynamicBattleEvent: DynamicBattleEvent
   """
   player = BigWorld.player()
+  serverName = player.connectionMgr.serverUserName
+  if config.get('hideServer'):
+    serverName = re.sub(r'\d+', '_hide_', serverName)
+
   dynamicBattleEvent.setupDynamicBattleInfo(
     arenaTag=player.arena.arenaType.geometry,
     playerName=player.name,
@@ -63,7 +68,7 @@ def setup_dynamic_battle_info(dynamicBattleEvent):
     accountDBID=player.arena.vehicles[player.playerVehicleID]['accountDBID'],
     battleMode=ARENA_TAGS[player.arena.bonusType],
     battleGameplay=ARENA_GAMEPLAY_NAMES[player.arenaTypeID >> 16],
-    serverName=player.connectionMgr.serverUserName,
+    serverName=serverName,
     region=AUTH_REALM,
     gameVersion=GAME_VERSION,
     modVersion=config.get('version'),

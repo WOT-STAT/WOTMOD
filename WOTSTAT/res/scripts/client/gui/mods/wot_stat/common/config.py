@@ -15,7 +15,8 @@ class Config:
     'initBattleURL': 'https://wotstat.info/api/events/OnBattleStart',
     'eventURL': 'https://wotstat.info/api/events/send',
     'updateURL': 'https://api.github.com/repos/WOT-STAT/WOTMOD/releases/latest',
-    'statusURL': 'https://wotstat.info/api'
+    'statusURL': 'https://wotstat.info/api',
+    'hideServer': False
   }
 
   def __init__(self, ConfigPath, DefaultParams=None):
@@ -31,7 +32,7 @@ class Config:
           print_log(self.config)
           config_str = '''\n------\n'''.join("%s: %s" % (key, value) for key, value in self.config.items())
 
-          message = '''[WotStat] Обнаружена новая конфигурация в файле /mods/configs/wot_stat/config.cfg, теперь события будут отправляться на НЕофициальный сервер.\n------\n%s''' % config_str
+          message = '''[WotStat] Обнаружена новая конфигурация в файле /mods/configs/wot_stat/config.cfg\n------\n%s''' % config_str
 
           BigWorld.callback(5.0, lambda: show_notification(message, message_type=SystemMessages.SM_TYPE.Warning))
         except Exception, e:

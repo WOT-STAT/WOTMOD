@@ -6,15 +6,23 @@ from VehicleGunRotator import VehicleGunRotator
 from gui.Scaleform.daapi.view.lobby.battle_queue import BattleQueue
 from ProjectileMover import ProjectileMover
 from Vehicle import Vehicle
+from helpers import dependency
+from skeletons.connection_mgr import IConnectionManager
 import Event
 
 from ..common.hook import g_overrideLib
 
 
 class WotHookEvents:
+  __connectionMgr = dependency.descriptor(IConnectionManager)
+
   def __init__(self):
+    # DI
+    self.__connectionMgr.onConnected += self.__onConnected
+
     self.listeners = {}
     # ------------------INIT------------------#
+    self.onConnected = Event.Event()
     self.Account_onBecomePlayer = Event.Event()
     self.BattleQueue_populate = Event.Event()
     self.PlayerAvatar_onEnterWorld = Event.Event()
@@ -37,6 +45,9 @@ class WotHookEvents:
     self.ProjectileMover_killProjectile = Event.Event()
     # -------------------HELP-------------------#
     self.PlayerAvatar_enableServerAim = Event.Event()
+
+  def __onConnected(self):
+    self.onConnected()
 
 
 wotHookEvents = WotHookEvents()

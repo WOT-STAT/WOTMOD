@@ -6,8 +6,9 @@ from constants import ARENA_PERIOD, ARENA_PERIOD_NAMES
 
 from ..eventLogger import eventLogger, battle_time
 from ..events import OnBattleStart
-from ..utils import vector, setup_dynamic_battle_info
+from ..utils import vector, setup_dynamic_battle_info, setup_session_meta
 from ..wotHookEvents import wotHookEvents
+from ..sessionStorage import sessionStorage
 from ...utils import print_log, print_debug
 
 
@@ -82,8 +83,10 @@ class OnBattleStartLogger:
                                   )
 
     setup_dynamic_battle_info(onBattleStart)
+    setup_session_meta(onBattleStart)
 
     eventLogger.emit_event(onBattleStart)
+    sessionStorage.on_start_battle()
 
 
 onBattleStartLogger = OnBattleStartLogger()

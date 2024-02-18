@@ -18,6 +18,38 @@ class Event:
     return self.__dict__
 
 
+class SessionMeta(object):
+  sessionStart = ''
+  lastBattleAgo = 0
+  sessionStartAgo = 0
+
+  battleStarts = 0
+  battleResults = 0
+  winCount = 0
+  totalShots = 0
+  totalShotsDamaged = 0
+  totalShotsHit = 0
+
+  lastResult = []
+  lastDmgPlace = []
+  lastXpPlace = []
+
+  def setupSessionMeta(self, battleStarts, battleResults, winCount, totalShots, totalShotsDamaged, totalShotsHit,
+                       lastResult, lastDmgPlace, lastXpPlace, sessionStart, lastBattleAgo, sessionStartAgo):
+    self.sessionStart = sessionStart
+    self.sessionStartAgo = sessionStartAgo
+    self.lastBattleAgo = lastBattleAgo
+    self.battleStarts = battleStarts
+    self.battleResults = battleResults
+    self.winCount = winCount
+    self.totalShots = totalShots
+    self.totalShotsDamaged = totalShotsDamaged
+    self.totalShotsHit = totalShotsHit
+    self.lastResult = list(lastResult)
+    self.lastDmgPlace = list(lastDmgPlace)
+    self.lastXpPlace = list(lastXpPlace)
+
+
 class BattleEvent(Event):
   def __init__(self, event_name, battleTime):
     Event.__init__(self, event_name)
@@ -62,7 +94,7 @@ class DynamicBattleEvent(BattleEvent):
     self.gunTag = gunTag
 
 
-class OnBattleStart(DynamicBattleEvent):
+class OnBattleStart(DynamicBattleEvent, SessionMeta):
 
   def __init__(self, arenaId, spawnPoint, battleTime,
                battlePeriod, loadTime, preBattleWaitTime, inQueueWaitTime, gameplayMask):
@@ -77,13 +109,13 @@ class OnBattleStart(DynamicBattleEvent):
     self.gameplayMask = gameplayMask
 
 
-class OnShot(DynamicBattleEvent):
+class OnShot(DynamicBattleEvent, SessionMeta):
   class HIT_REASON:
     TANK = 'tank'
     TERRAIN = 'terrain'
 
   def __init__(self):
-    BattleEvent.__init__(self, Event.NAMES.ON_SHOT, 0)
+    DynamicBattleEvent.__init__(self, Event.NAMES.ON_SHOT, 0)
 
     self.battleTime = None
     self.serverMarkerPoint = None
@@ -216,12 +248,12 @@ class OnShot(DynamicBattleEvent):
     self.battleTime = time
 
 
-class OnBattleResult(DynamicBattleEvent):
+class OnBattleResult(DynamicBattleEvent, SessionMeta):
   raw = None
   result = None
 
   def __init__(self):
-    Event.__init__(self, Event.NAMES.ON_BATTLE_RESULT)
+    DynamicBattleEvent.__init__(self, Event.NAMES.ON_BATTLE_RESULT, 0)
 
   def set_result(self, raw, result):
     self.raw = raw

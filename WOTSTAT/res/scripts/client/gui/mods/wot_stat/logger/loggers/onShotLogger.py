@@ -8,10 +8,11 @@ from constants import SERVER_TICK_LENGTH, ATTACK_REASON, ATTACK_REASON_INDICES, 
 
 from ..eventLogger import eventLogger, battle_time
 from ..events import OnShot
-from ..utils import vector, own_gun_position, setup_dynamic_battle_info
+from ..utils import vector, own_gun_position, setup_dynamic_battle_info, setup_session_meta
 from ..wotHookEvents import wotHookEvents
 from ...utils import print_debug, print_log
 from ...logical.shotEventCollector import shotEventCollector
+from ..sessionStorage import sessionStorage
 
 
 def own_effect_index(player):
@@ -126,6 +127,8 @@ class OnShotLogger:
           print_log('SHOT IS NOT INIT. ERROR')
           continue
 
+        sessionStorage.on_shot(has_damage=len(filter(lambda t: t['damage'] > 0, r['damages'])) != 0,
+                               has_direct_hit=len(r['damages']) > 0)
         eventLogger.emit_event(onShot)
 
         log = ""
@@ -177,6 +180,7 @@ class OnShotLogger:
     self.temp_shot.set_server_marker(vector(self.marker_server_pos), self.marker_server_disp)
     self.temp_shot.set_client_marker(vector(self.marker_client_pos), self.marker_client_disp)
     setup_dynamic_battle_info(self.temp_shot)
+    setup_session_meta(self.temp_shot)
     shot = player.vehicleTypeDescriptor.shot
 
     playerVehicle = player.vehicle if player.vehicle else self.cachedVehicle

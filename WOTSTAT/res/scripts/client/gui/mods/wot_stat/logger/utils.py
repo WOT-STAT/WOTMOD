@@ -6,6 +6,7 @@ from constants import ARENA_BONUS_TYPE, ARENA_GAMEPLAY_NAMES, AUTH_REALM
 from gui.battle_control.battle_constants import FEEDBACK_EVENT_ID
 from vehicle_systems.tankStructure import TankPartNames
 from account_shared import readClientServerVersion
+from .sessionStorage import sessionStorage
 from ..load_mod import config
 
 
@@ -78,4 +79,10 @@ def setup_dynamic_battle_info(dynamicBattleEvent):
     tankLevel=player.vehicleTypeDescriptor.level,
     gunTag=player.vehicleTypeDescriptor.gun.name
   )
-  pass
+
+
+def setup_session_meta(dynamicBattleEvent):
+  """
+  @type dynamicBattleEvent: SessionMeta
+  """
+  sessionStorage.setup_session_meta(dynamicBattleEvent)

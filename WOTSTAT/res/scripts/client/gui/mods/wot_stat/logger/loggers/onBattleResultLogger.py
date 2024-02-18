@@ -4,10 +4,11 @@ import BattleReplay
 import BigWorld
 from PlayerEvents import g_playerEvents
 from ..eventLogger import eventLogger
+from ..sessionStorage import sessionStorage
 from ..events import OnBattleResult
 from ...utils import print_log, print_debug
 from items import vehicles as vehiclesWG
-from ..utils import short_tank_type, setup_dynamic_battle_info
+from ..utils import short_tank_type, setup_dynamic_battle_info, setup_session_meta
 
 
 class OnBattleResultLogger:
@@ -51,7 +52,6 @@ class OnBattleResultLogger:
         pass
 
 
-  # TODO: Декодировать больше результатов
   def process_battle_result(self, results):
     arenaID = results.get('arenaUniqueID')
     print_debug("Got result for {}".format(arenaID))
@@ -151,8 +151,9 @@ class OnBattleResultLogger:
 
       personal.update(getVehicleInfo(personalRes))
 
+      battle_result = 'tie' if not winnerTeam else 'win' if winnerTeamIsMy else 'lose'
       decodeResult['playerTeam'] = playerTeam
-      decodeResult['result'] = 'tie' if not winnerTeam else 'win' if winnerTeamIsMy else 'lose'
+      decodeResult['result'] = battle_result
       decodeResult['teamHealth'] = teamHealth
       decodeResult['personal'] = personal
       decodeResult['playersResults'] = playersResultList
@@ -160,13 +161,20 @@ class OnBattleResultLogger:
       decodeResult['originalCredits'] = personalRes['originalCredits']
       decodeResult['duration'] = results['common']['duration']
       decodeResult['winnerTeam'] = winnerTeam
+      decodeResult['arenaID'] = arenaID
+
+      setup_session_meta(battleEvent)
+      battleEvent.set_result(result=decodeResult, raw=str(results))
+      eventLogger.emit_event(battleEvent, arena_id=arenaID)
+
+      sessionStorage.on_result_battle(result=battle_result,
+                                      player_team=playerTeam,
+                                      player_bdid=avatar['accountDBID'],
+                                      players_results=playersResultList)
 
     except Exception, e:
       print_log('cannot decode battle result\n' + str(e))
       print(e)
-
-    battleEvent.set_result(result=decodeResult, raw=str(results))
-    eventLogger.emit_event(battleEvent, arena_id=arenaID)
 
 
 onBattleResultLogger = OnBattleResultLogger()

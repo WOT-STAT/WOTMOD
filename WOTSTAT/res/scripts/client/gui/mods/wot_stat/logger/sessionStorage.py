@@ -26,6 +26,9 @@ class SessionStorage(object):
   _last_10_dmg_place = []
   _last_10_xp_place = []
 
+  def on_load_mod(self):
+    pass
+
   def on_start_battle(self):
     self._battle_starts += 1
     self._last_battle_start_time = self._current_battle_start_time
@@ -56,12 +59,13 @@ class SessionStorage(object):
     @type sessionMeta: SessionMeta
     """
 
+    lastBattle = self._last_battle_start_time
     sessionMeta.setupSessionMeta(battleResults=self._battle_results, battleStarts=self._battle_starts,
                                  winCount=self._win_count, totalShots=self._total_shots,
                                  totalShotsDamaged=self._total_shots_damaged, totalShotsHit=self._total_shots_hit,
                                  lastResult=self._last_10_result, lastDmgPlace=self._last_10_dmg_place,
                                  lastXpPlace=self._last_10_xp_place, sessionStart=self._start_session_localtime,
-                                 lastBattleAgo=int(BigWorld.time() - self._last_battle_start_time),
+                                 lastBattleAgo=int(BigWorld.time() - lastBattle) if lastBattle != 0 else 0,
                                  sessionStartAgo=int(BigWorld.time() - self._start_session_time))
 
 

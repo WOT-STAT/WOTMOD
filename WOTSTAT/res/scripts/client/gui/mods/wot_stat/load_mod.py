@@ -14,6 +14,7 @@ configPath = './mods/configs/wot_stat/config.cfg'
 config = Config(configPath)  # type: Config
 from .logger.eventLogger import eventLogger
 from .logger.wotHookEvents import wotHookEvents
+from .logger.sessionStorage import sessionStorage
 
 is_success_check = None
 api_server_time = None
@@ -108,6 +109,7 @@ def init_mod():
                      on_start_update=new_version_found,
                      on_updated=new_version_update_end,
                      on_success_check=on_success_check)
+  sessionStorage.on_load_mod()
 
 
 wotHookEvents.onConnected += on_connected

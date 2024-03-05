@@ -8,7 +8,7 @@
 От релизной версии он отличается файлом wot_stat/common/crypto.py, сейчас в нём расположена заглушка, релизная версия кодирует отправляемый на сервер json, дабы усложнить жизнь желающим заспамить сервер фейковыми сообщениями.
 
 ### Компиляция 
-На Unix системах `./build.sh -v 1.0.0.0-a.1` в папке `WOTSTAT`
+На Unix системах `./build.sh -v 1.0.0.0-a.1 -d` в папке `WOTSTAT`. Флаг `-d` отвечает за дебаг версию с print_debug выводом.
 
 ## Структура
 [Логгеры](WOTSTAT/res/scripts/client/gui/mods/wot_stat/logger/loggers) создают события [events](WOTSTAT/res/scripts/client/gui/mods/wot_stat/logger/events.py) и добавляют их в [eventLogger](WOTSTAT/res/scripts/client/gui/mods/wot_stat/logger/eventLogger.py), который хранит и добавляет в нужную игровую сессию [battleEventSession](WOTSTAT/res/scripts/client/gui/mods/wot_stat/logger/battleEventSession.py) это событие.

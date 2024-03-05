@@ -1,9 +1,12 @@
 #!/bin/bash
 
-while getopts v: flag
+d=false
+
+while getopts "v:d" flag
 do
     case "${flag}" in
         v) v=${OPTARG};;
+        d) d=true;;
     esac
 done
 
@@ -14,6 +17,15 @@ cp -r ./res ./build
 
 configPath="./build/res/scripts/client/gui/mods/wot_stat/common/config.py"
 echo -e "version = '$v'\n$(cat $configPath)" > $configPath
+
+utilsPath="./build/res/scripts/client/gui/mods/wot_stat/utils.py"
+if [ "$d" = true ]; then
+    echo "Building DEBUG version."
+    echo -e "DEBUG_MODE = True\n$(cat $utilsPath)" > $utilsPath
+else
+    echo "Building RELEASE version."
+    echo -e "DEBUG_MODE = False\n$(cat $utilsPath)" > $utilsPath
+fi
 
 python2 -m compileall ./build
 

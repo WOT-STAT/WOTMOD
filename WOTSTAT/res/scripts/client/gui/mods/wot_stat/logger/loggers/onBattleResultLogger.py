@@ -164,7 +164,7 @@ class OnBattleResultLogger:
       decodeResult['arenaID'] = arenaID
 
       setup_session_meta(battleEvent)
-      battleEvent.set_result(result=decodeResult, raw=str(results))
+      battleEvent.set_result(result=decodeResult)
       eventLogger.emit_event(battleEvent, arena_id=arenaID)
 
       sessionStorage.on_result_battle(result=battle_result,
@@ -174,7 +174,6 @@ class OnBattleResultLogger:
 
     except Exception, e:
       print_log('cannot decode battle result\n' + str(e))
-      print(e)
 
 
 onBattleResultLogger = OnBattleResultLogger()

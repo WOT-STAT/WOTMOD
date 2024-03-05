@@ -3,7 +3,7 @@ import BigWorld
 
 from events import Event, OnBattleStart, OnBattleResult
 from ..common.asyncResponse import post_async
-from ..utils import print_log
+from ..utils import print_log, print_debug
 
 try:
   from ..common.crypto import encrypt
@@ -34,7 +34,7 @@ class BattleEventSession:
     self.enable = False
 
     data = json.dumps(on_end_load_event.get_dict())
-    print_log(data)
+    print_debug(data)
     post_async(self.initURL, encrypt(data), self.__init_send_callback)
 
   def add_event(self, event):

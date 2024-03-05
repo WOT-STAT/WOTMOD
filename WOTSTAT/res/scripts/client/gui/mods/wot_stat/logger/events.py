@@ -249,14 +249,12 @@ class OnShot(DynamicBattleEvent, SessionMeta):
 
 
 class OnBattleResult(DynamicBattleEvent, SessionMeta):
-  raw = None
   result = None
 
   def __init__(self):
     DynamicBattleEvent.__init__(self, Event.NAMES.ON_BATTLE_RESULT, 0)
 
-  def set_result(self, raw, result):
-    self.raw = raw
+  def set_result(self, result):
     self.result = result
 
 

@@ -20,7 +20,9 @@ def own_effect_index(player):
 
 
 def tank_name_by_id(vehicleID):
-  return BigWorld.player().arena.vehicles[vehicleID]['vehicleType'].name
+  vehicle = BigWorld.player().arena.vehicles[vehicleID]
+  if not vehicle: return 'unknown'
+  return vehicle['vehicleType'].name
 
 
 def decode_hit_point(obj, decodedPoints):
@@ -252,8 +254,8 @@ class OnShotLogger:
       shotEventCollector.shot_result(vehicleID, flags, health)
 
   def on_health_changed(self, obj, newHealth, oldHealth, attackerID, attackReasonID):
-    if attackerID == BigWorld.player().playerVehicleID and BigWorld.player().arena.vehicles[obj.id][
-      'team'] != BigWorld.player().team:
+    vehicle = BigWorld.player().arena.vehicles[obj.id]
+    if attackerID == BigWorld.player().playerVehicleID and (not vehicle or vehicle['team'] != BigWorld.player().team):
       if attackReasonID == ATTACK_REASON_INDICES[ATTACK_REASON.SHOT]:
         shotEventCollector.shot_damage(obj.id, newHealth, oldHealth)
       if attackReasonID == ATTACK_REASON_INDICES[ATTACK_REASON.FIRE]:

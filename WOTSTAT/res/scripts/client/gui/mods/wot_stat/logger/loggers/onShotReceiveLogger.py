@@ -7,9 +7,11 @@ from ...utils import print_debug
 
 class OnShotReceiveLogger:
   def __init__(self):
-    wotHookEvents.Vehicle_showDamageFromShot += self.show_damage_from_shot
-    wotHookEvents.Vehicle_onHealthChanged += self.on_health_changed
-    wotHookEvents.PlayerAvatar_showOwnVehicleHitDirection += self.showOwnVehicleHitDirection
+    pass
+    # TODO: realize this
+    # wotHookEvents.Vehicle_showDamageFromShot += self.show_damage_from_shot
+    # wotHookEvents.Vehicle_onHealthChanged += self.on_health_changed
+    # wotHookEvents.PlayerAvatar_showOwnVehicleHitDirection += self.showOwnVehicleHitDirection
 
   def on_health_changed(self, obj, newHealth, oldHealth, attackerID, attackReasonID):
     if obj.id == BigWorld.player().playerVehicleID and \

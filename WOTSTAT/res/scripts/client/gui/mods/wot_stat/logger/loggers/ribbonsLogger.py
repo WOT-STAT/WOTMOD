@@ -16,7 +16,8 @@ class OnRibbonsLogger:
 
   def __init__(self):
     self.number = 0
-    wotHookEvents.PlayerAvatar_onEnterWorld += self.on_enter_world
+    # TODO: realize this
+    # wotHookEvents.PlayerAvatar_onEnterWorld += self.on_enter_world
 
   def on_enter_world(self, *a, **k):
     sessionProvider = dependency.instance(IBattleSessionProvider)

@@ -195,7 +195,8 @@ class OnShotLogger:
                              shot_dispersion=shot_dispersion,
                              shell_name=player.vehicleTypeDescriptor.shot.shell.name,
                              shell_tag=player.vehicleTypeDescriptor.shot.shell.kind,
-                             damage=shot.shell.armorDamage[0] if hasattr(shot.shell, 'armorDamage') else shot.shell.damage[0],
+                             damage=shot.shell.armorDamage[0] if hasattr(shot.shell, 'armorDamage') else
+                             shot.shell.damage[0],
                              damage_randomization=shot.shell.damageRandomization,
                              caliber=shot.shell.caliber,
                              piercing_power=shot.piercingPower[0],
@@ -221,8 +222,8 @@ class OnShotLogger:
     print_debug(
       '[shoot]\nhealth: %s\nserver_dispersion: %s\nclient_dispersion: %s\nturret_speed: %s\nvehicle_speed: %s\nvehicle_rotation_speed: %s' % (
         playerVehicle.health,
-        self.marker_server_disp / shot_dispersion,
-        self.marker_client_disp / shot_dispersion,
+        self.marker_server_disp / shot_dispersion if self.marker_server_disp else None,
+        self.marker_client_disp / shot_dispersion if self.marker_client_disp else None,
         player.gunRotator.turretRotationSpeed * 180 / math.pi,
         player.getOwnVehicleSpeeds()[0] * 3.6,
         player.getOwnVehicleSpeeds()[1] * 180 / math.pi

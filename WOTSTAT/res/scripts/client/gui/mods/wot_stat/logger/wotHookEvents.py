@@ -8,9 +8,26 @@ from ProjectileMover import ProjectileMover
 from Vehicle import Vehicle
 from helpers import dependency
 from skeletons.connection_mgr import IConnectionManager
-import Event
+from Event import Event
+from debug_utils import LOG_CURRENT_EXCEPTION
 
 from ..common.hook import g_overrideLib
+from ..serverLogger import send_current_exception
+
+
+class SafeEvent(Event):
+  __slots__ = ()
+
+  def __init__(self, manager=None):
+    super(SafeEvent, self).__init__(manager)
+
+  def __call__(self, *args, **kwargs):
+    for delegate in self[:]:
+      try:
+        delegate(*args, **kwargs)
+      except:
+        send_current_exception()
+        LOG_CURRENT_EXCEPTION()
 
 
 class WotHookEvents:
@@ -22,29 +39,29 @@ class WotHookEvents:
 
     self.listeners = {}
     # ------------------INIT------------------#
-    self.onConnected = Event.Event()
-    self.Account_onBecomePlayer = Event.Event()
-    self.BattleQueue_populate = Event.Event()
-    self.PlayerAvatar_onEnterWorld = Event.Event()
-    self.PlayerAvatar_updateTargetingInfo = Event.Event()
-    self.PlayerAvatar_onArenaPeriodChange = Event.Event()
+    self.onConnected = SafeEvent()
+    self.Account_onBecomePlayer = SafeEvent()
+    self.BattleQueue_populate = SafeEvent()
+    self.PlayerAvatar_onEnterWorld = SafeEvent()
+    self.PlayerAvatar_updateTargetingInfo = SafeEvent()
+    self.PlayerAvatar_onArenaPeriodChange = SafeEvent()
     # -------------------MOVE------------------#
-    self.VehicleGunRotator_setShotPosition = Event.Event()
-    self.VehicleGunRotator_updateGunMarker = Event.Event()
-    self.PlayerAvatar_updateGunMarker = Event.Event()
+    self.VehicleGunRotator_setShotPosition = SafeEvent()
+    self.VehicleGunRotator_updateGunMarker = SafeEvent()
+    self.PlayerAvatar_updateGunMarker = SafeEvent()
     # -------------------SHOT------------------#
-    self.PlayerAvatar_shoot = Event.Event()
-    self.PlayerAvatar_showTracer = Event.Event()
-    self.PlayerAvatar_showShotResults = Event.Event()
-    self.Vehicle_onHealthChanged = Event.Event()
-    self.PlayerAvatar_showOwnVehicleHitDirection = Event.Event()
+    self.PlayerAvatar_shoot = SafeEvent()
+    self.PlayerAvatar_showTracer = SafeEvent()
+    self.PlayerAvatar_showShotResults = SafeEvent()
+    self.Vehicle_onHealthChanged = SafeEvent()
+    self.PlayerAvatar_showOwnVehicleHitDirection = SafeEvent()
     # -------------------EXPLOSION------------------#
-    self.PlayerAvatar_explodeProjectile = Event.Event()
-    self.Vehicle_showDamageFromShot = Event.Event()
+    self.PlayerAvatar_explodeProjectile = SafeEvent()
+    self.Vehicle_showDamageFromShot = SafeEvent()
     # -------------------PROJECTILE-------------------#
-    self.ProjectileMover_killProjectile = Event.Event()
+    self.ProjectileMover_killProjectile = SafeEvent()
     # -------------------HELP-------------------#
-    self.PlayerAvatar_enableServerAim = Event.Event()
+    self.PlayerAvatar_enableServerAim = SafeEvent()
 
   def __onConnected(self):
     self.onConnected()

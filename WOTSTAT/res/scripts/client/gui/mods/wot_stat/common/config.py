@@ -16,6 +16,7 @@ class Config:
     'eventURL': 'https://wotstat.info/api/events/send',
     'updateURL': 'https://api.github.com/repos/WOT-STAT/WOTMOD/releases/latest',
     'statusURL': 'https://wotstat.info/api',
+    'lokiURL': 'https://loki.wotstat.info/loki/api/v1/push',
     'hideServer': False
   }
 
@@ -48,6 +49,3 @@ class Config:
   def get(self, key):
     return self.config[key] if key in self.config else self.defaultParams[
       key] if key in self.defaultParams else None
-
-
-Config = Config

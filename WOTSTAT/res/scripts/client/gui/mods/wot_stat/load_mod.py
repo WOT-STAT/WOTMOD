@@ -2,19 +2,20 @@
 import BigWorld
 import json
 
-from gui import SystemMessages
 from .common.config import Config
+configPath = './mods/configs/wot_stat/config.cfg'
+config = Config(configPath)  # type: Config
+
+from gui import SystemMessages
 from .common.modAutoUpdate import update_game_version, update_mod_version
 from .common.modNotification import show_notification, OPEN_PERSONAL_WOTSTAT_EVENT
 from .common.asyncResponse import get_async
+
 from .utils import print_log
-
-
-configPath = './mods/configs/wot_stat/config.cfg'
-config = Config(configPath)  # type: Config
 from .logger.eventLogger import eventLogger
 from .logger.wotHookEvents import wotHookEvents
 from .logger.sessionStorage import sessionStorage
+from .serverLogger import setupLogger, send
 
 is_success_check = None
 api_server_time = None
@@ -98,9 +99,8 @@ def hello_message():
 
 
 def init_mod():
-  global logger
-
   print_log('version ' + config.get('version'))
+  setupLogger(config.get('lokiURL'), config.get('version'))
 
   get_async(config.get('statusURL'), callback=on_status_check, error_callback=on_status_check_fail)
   update_game_version(mod_name())
@@ -110,6 +110,7 @@ def init_mod():
                      on_updated=new_version_update_end,
                      on_success_check=on_success_check)
   sessionStorage.on_load_mod()
+  send("INFO", 'Mod init')
 
 
 wotHookEvents.onConnected += on_connected

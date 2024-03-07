@@ -195,7 +195,7 @@ class OnShotLogger:
                              shot_dispersion=shot_dispersion,
                              shell_name=player.vehicleTypeDescriptor.shot.shell.name,
                              shell_tag=player.vehicleTypeDescriptor.shot.shell.kind,
-                             damage=shot.shell.damage[0],
+                             damage=shot.shell.armorDamage[0] if hasattr(shot.shell, 'armorDamage') else shot.shell.damage[0],
                              damage_randomization=shot.shell.damageRandomization,
                              caliber=shot.shell.caliber,
                              piercing_power=shot.piercingPower[0],

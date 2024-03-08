@@ -12,7 +12,7 @@ from ..sessionStorage import sessionStorage
 from ..utils import vector, setup_dynamic_battle_info, setup_session_meta
 from ..wotHookEvents import wotHookEvents
 from ...logical.shotEventCollector import shotEventCollector
-from ...utils import print_debug
+from ...utils import print_debug, print_warn
 
 
 def own_effect_index(player):
@@ -84,6 +84,11 @@ class OnShotLogger:
     self.cachedVehicle = None
     self.active_tracers = []
     self.history_tracers = []
+    self.marker_server_disp = None
+    self.marker_server_pos = None
+    self.marker_client_disp = None
+    self.marker_client_pos = None
+    BigWorld.player().enableServerAim(True)
 
   def on_arena_period_change(self, obj, period, *a, **k):
     if period is ARENA_PERIOD.BATTLE:
@@ -180,6 +185,14 @@ class OnShotLogger:
         obj._PlayerAvatar__isOwnBarrelUnderWater() or \
         obj.isGunLocked or \
         obj._PlayerAvatar__isOwnVehicleSwitchingSiegeMode():
+      return
+
+    if self.marker_server_pos is None or \
+        self.marker_server_disp is None or \
+        self.marker_client_pos is None or \
+        self.marker_client_disp is None:
+      print_warn('Marker is None %s' % str(
+        (self.marker_server_pos, self.marker_server_disp, self.marker_client_pos, self.marker_client_disp)))
       return
 
     player = BigWorld.player()

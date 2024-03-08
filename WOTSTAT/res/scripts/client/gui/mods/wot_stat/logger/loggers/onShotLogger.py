@@ -1,18 +1,18 @@
-import BigWorld
 import math
 
+import BigWorld
+from Avatar import getVehicleShootingPositions
 from Math import Matrix
 from Vehicle import Vehicle
 from VehicleEffects import DamageFromShotDecoder
 from constants import SERVER_TICK_LENGTH, ATTACK_REASON, ATTACK_REASON_INDICES, ARENA_PERIOD
-
 from ..eventLogger import eventLogger, battle_time
 from ..events import OnShot
-from ..utils import vector, own_gun_position, setup_dynamic_battle_info, setup_session_meta
-from ..wotHookEvents import wotHookEvents
-from ...utils import print_debug, print_log
-from ...logical.shotEventCollector import shotEventCollector
 from ..sessionStorage import sessionStorage
+from ..utils import vector, setup_dynamic_battle_info, setup_session_meta
+from ..wotHookEvents import wotHookEvents
+from ...logical.shotEventCollector import shotEventCollector
+from ...utils import print_debug
 
 
 def own_effect_index(player):
@@ -62,6 +62,7 @@ class OnShotLogger:
     wotHookEvents.Vehicle_onHealthChanged += self.on_health_changed
     wotHookEvents.PlayerAvatar_onArenaPeriodChange += self.on_arena_period_change
     wotHookEvents.PlayerAvatar_enableServerAim += on_enable_server_aim
+    wotHookEvents.PlayerAvatar_onEnterWorld += self.on_enter_world
 
     self.marker_server_pos = None
     self.marker_server_disp = None
@@ -79,6 +80,10 @@ class OnShotLogger:
 
     self.cachedVehicle = None
 
+  def on_enter_world(self, obj, *a, **k):
+    self.cachedVehicle = None
+    self.active_tracers = []
+    self.history_tracers = []
 
   def on_arena_period_change(self, obj, period, *a, **k):
     if period is ARENA_PERIOD.BATTLE:
@@ -185,12 +190,18 @@ class OnShotLogger:
     setup_session_meta(self.temp_shot)
     shot = player.vehicleTypeDescriptor.shot
 
-    playerVehicle = player.vehicle if player.vehicle else self.cachedVehicle
-    vehicle_descr, chassis_descr, turret_descr, gun_descr, yaw, pitch = get_full_descr(playerVehicle)
-    shot_dispersion = player.vehicleTypeDescriptor.gun.shotDispersionAngle * player._PlayerAvatar__dispersionInfo[0]
+    player_vehicle = player.vehicle
+    if player_vehicle:
+      self.cachedVehicle = player_vehicle
+    else:
+      player_vehicle = self.cachedVehicle
 
-    self.temp_shot.set_shoot(gun_position=vector(own_gun_position(player)),
-                             health=playerVehicle.health,
+    vehicle_descr, chassis_descr, turret_descr, gun_descr, yaw, pitch = get_full_descr(player_vehicle)
+    shot_dispersion = player.vehicleTypeDescriptor.gun.shotDispersionAngle * player._PlayerAvatar__dispersionInfo[0]
+    gun_position = getVehicleShootingPositions(player_vehicle)[0]
+
+    self.temp_shot.set_shoot(gun_position=vector(gun_position),
+                             health=player_vehicle.health,
                              battle_dispersion=player.vehicleTypeDescriptor.gun.shotDispersionAngle,
                              shot_dispersion=shot_dispersion,
                              shell_name=player.vehicleTypeDescriptor.shot.shell.name,
@@ -221,7 +232,7 @@ class OnShotLogger:
 
     print_debug(
       '[shoot]\nhealth: %s\nserver_dispersion: %s\nclient_dispersion: %s\nturret_speed: %s\nvehicle_speed: %s\nvehicle_rotation_speed: %s' % (
-        playerVehicle.health,
+        player_vehicle.health,
         self.marker_server_disp / shot_dispersion if self.marker_server_disp else None,
         self.marker_client_disp / shot_dispersion if self.marker_client_disp else None,
         player.gunRotator.turretRotationSpeed * 180 / math.pi,
@@ -274,6 +285,9 @@ class OnShotLogger:
     player = BigWorld.player()
 
     if attackerID != player.playerVehicleID or effectsIndex not in own_effect_index(player):
+      return
+
+    if not obj.isStarted:
       return
 
     decodedPoints = DamageFromShotDecoder.decodeHitPoints(points, obj.appearance.collisions)

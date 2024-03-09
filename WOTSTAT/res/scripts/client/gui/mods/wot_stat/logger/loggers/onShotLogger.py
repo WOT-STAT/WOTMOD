@@ -48,6 +48,20 @@ def on_enable_server_aim(obj, enable, *a, **k):
     BigWorld.player().enableServerAim(True)
 
 
+def get_player_vehicle():
+  player = BigWorld.player()
+
+  if hasattr(player, 'vehicle') and player.vehicle is not None:
+    return player.vehicle
+
+  if hasattr(player, 'playerVehicleID') and player.playerVehicleID is not None:
+    entity = BigWorld.entity(player.playerVehicleID)
+    if entity is not None and isinstance(entity, Vehicle) and entity.isPlayerVehicle:
+      return entity
+
+  return None
+
+
 class OnShotLogger:
 
   def __init__(self):
@@ -203,11 +217,14 @@ class OnShotLogger:
     setup_session_meta(self.temp_shot)
     shot = player.vehicleTypeDescriptor.shot
 
-    player_vehicle = player.vehicle
-    if player_vehicle:
+    player_vehicle = get_player_vehicle()
+    if player_vehicle is not None:
       self.cachedVehicle = player_vehicle
-    else:
+    elif self.cachedVehicle is not None:
       player_vehicle = self.cachedVehicle
+    else:
+      print_warn("Can not get player vehicle")
+      return
 
     vehicle_descr, chassis_descr, turret_descr, gun_descr, yaw, pitch = get_full_descr(player_vehicle)
     shot_dispersion = player.vehicleTypeDescriptor.gun.shotDispersionAngle * player._PlayerAvatar__dispersionInfo[0]

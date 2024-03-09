@@ -1,20 +1,20 @@
 import BattleReplay
 import BigWorld
-from PlayerEvents import g_playerEvents
 from account_helpers import gameplay_ctx
 from constants import ARENA_PERIOD, ARENA_PERIOD_NAMES
-
 from ..eventLogger import eventLogger, battle_time
 from ..events import OnBattleStart
+from ..sessionStorage import sessionStorage
 from ..utils import vector, setup_dynamic_battle_info, setup_session_meta
 from ..wotHookEvents import wotHookEvents
-from ..sessionStorage import sessionStorage
-from ...utils import print_log, print_debug
+from ...utils import print_debug
 
 
 class OnBattleStartLogger:
   def __init__(self):
     self.battle_loaded = False
+    self.is_queue_visible = False
+    self.is_battle_initialized = False
 
     self.on_enter_queue_time = 0  # Вход в очередь
     self.on_enter_world_time = 0  # Вход в бой
@@ -28,12 +28,18 @@ class OnBattleStartLogger:
 
   def on_enqueued(self, obj, *a, **k):
     print_debug('OnBattleStartLogger.on_enqueued')
+
+    self.is_queue_visible = True
+    self.battle_loaded = False
     self.on_enter_queue_time = BigWorld.serverTime()
 
   def on_enter_world(self, obj, *a, **k):
     print_debug('OnBattleStartLogger.on_enter_world')
 
     self.battle_loaded = False
+    self.is_battle_initialized = False
+    if not self.is_queue_visible:
+      self.on_enter_queue_time = BigWorld.serverTime()
     self.on_enter_world_time = BigWorld.serverTime()
 
   def update_targeting_info(self, obj, turretYaw, gunPitch, maxTurretRotationSpeed, maxGunRotationSpeed,
@@ -41,8 +47,6 @@ class OnBattleStartLogger:
     if BattleReplay.isPlaying():
       return
     if not hasattr(BigWorld.player(), 'arena') or not BigWorld.player().getOwnVehiclePosition():
-      return
-    if self.battle_loaded:
       return
 
     print_debug("______OnEndLoad______")
@@ -62,8 +66,11 @@ class OnBattleStartLogger:
   def init_battle_session(self):
     if not self.battle_loaded:
       return
+    if self.is_battle_initialized:
+      return
 
     print_debug("______INIT______")
+    self.is_battle_initialized = True
 
     player = BigWorld.player()
 
@@ -72,13 +79,21 @@ class OnBattleStartLogger:
       else player.arena.periodEndTime - player.arena.periodLength
 
     player.enableServerAim(True)
+
+    prebattle_time = max(0, eventLogger.start_battle_time - self.on_end_load_time)
+    loading_time = self.on_end_load_time - self.on_enter_world_time
+    queueing_time = self.on_enter_world_time - self.on_enter_queue_time
+
+    print_debug("Timings:\n\tqueueing_time: %s\n\tloading_time: %s\n\tprebattle_time: %s\n" % (
+      queueing_time, loading_time, prebattle_time))
+
     onBattleStart = OnBattleStart(arenaId=player.arenaUniqueID,
                                   spawnPoint=vector(player.getOwnVehiclePosition()),
                                   battlePeriod=ARENA_PERIOD_NAMES[player.arena.period],
                                   battleTime=battle_time(),
-                                  loadTime=self.on_end_load_time - self.on_enter_world_time,
-                                  preBattleWaitTime=BigWorld.serverTime() - self.on_end_load_time,
-                                  inQueueWaitTime=self.on_enter_world_time - self.on_enter_queue_time,
+                                  loadTime=loading_time,
+                                  preBattleWaitTime=prebattle_time,
+                                  inQueueWaitTime=queueing_time,
                                   gameplayMask=gameplay_ctx.getMask()
                                   )
 
@@ -87,6 +102,11 @@ class OnBattleStartLogger:
 
     eventLogger.emit_event(onBattleStart)
     sessionStorage.on_start_battle()
+
+    self.on_enter_queue_time = 0
+    self.on_enter_world_time = 0
+    self.on_end_load_time = 0
+    self.is_queue_visible = False
 
 
 onBattleStartLogger = OnBattleStartLogger()

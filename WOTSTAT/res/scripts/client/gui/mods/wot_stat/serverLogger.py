@@ -1,18 +1,17 @@
-import sys
-import os
-import json
-import time
 import hashlib
+import json
+import os
+import sys
+import time
+from traceback import format_exception
 
 from typing import List
 
 import BigWorld
-from traceback import format_exception
 import excepthook
-from debug_utils import _addTagsToMsg, _makeMsgHeader, LOG_CURRENT_EXCEPTION, _src_file_trim_to, _g_logLock
-from constants import AUTH_REALM
 from account_shared import readClientServerVersion
-
+from constants import AUTH_REALM
+from debug_utils import _addTagsToMsg, _makeMsgHeader, LOG_CURRENT_EXCEPTION, _src_file_trim_to, _g_logLock
 from .common.asyncResponse import post_async
 
 logger = None  # type: ServerLogger
@@ -104,7 +103,7 @@ class Message:
 
 
 def _on_send_error(res):
-  print('[WOTSTAT SERVER LOGGER] sending error')
+  print('[WOTSTAT LOGGER] sending error')
   print(res)
 
 
@@ -114,7 +113,7 @@ class ServerLogger:
 
   def __init__(self, url):
     self.url = url
-    print("[WOTSTAT SERVER LOGGER]: Init server logger to: %s", self.url)
+    print("[WOTSTAT LOGGER]: Init server logger to: %s", self.url)
     self._sending_loop()
 
   def send(self, level, msg):
@@ -147,9 +146,13 @@ class ServerLogger:
         })
 
       data = {"streams": streams}
-      post_async(self.url, data=json.dumps(data), error_callback=_on_send_error)
 
-      self.logs_queue = []
+      send_data = json.dumps(data, ensure_ascii=False)
+      post_async(self.url, data=send_data, error_callback=_on_send_error)
+
     except:
-      print("[WOTSTAT SERVER EXCEPTION]")
+      print("[WOTSTAT LOGGER EXCEPTION]")
       LOG_CURRENT_EXCEPTION()
+
+    finally:
+      self.logs_queue = []

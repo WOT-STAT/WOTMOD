@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-import BigWorld
 import json
 
+import BigWorld
 from .common.config import Config
 configPath = './mods/configs/wot_stat/config.cfg'
 config = Config(configPath)  # type: Config
@@ -12,10 +12,9 @@ from .common.modNotification import show_notification, OPEN_PERSONAL_WOTSTAT_EVE
 from .common.asyncResponse import get_async
 
 from .utils import print_log
-from .logger.eventLogger import eventLogger
 from .logger.wotHookEvents import wotHookEvents
 from .logger.sessionStorage import sessionStorage
-from .serverLogger import setupLogger, send
+from .common.serverLogger import setupLogger, send
 
 is_success_check = None
 api_server_time = None

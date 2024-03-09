@@ -1,24 +1,18 @@
-import Event as BigWorldEvent
-from constants import ARENA_PERIOD
-
 from battleEventSession import BattleEventSession
-from ..load_mod import config
-from ..utils import print_log, print_debug
-from .utils import *
+from constants import ARENA_PERIOD
 from events import Event
+from .utils import *
+from ..common.exceptionSending import SendExceptionEvent
+from ..utils import print_debug
 
 
 class EventLogger:
   old_battle_event_sessions = {}
   battle_event_session = None  # type: BattleEventSession
   start_battle_time = 0
-  on_session_created = BigWorldEvent.Event()
+  on_session_created = SendExceptionEvent()
 
   def __init__(self):
-    self.old_battle_event_sessions = {}
-    self.battle_event_session = None
-    self.start_battle_time = 0
-    self.on_session_created = BigWorldEvent.Event()
     print_debug('INIT EVENT LOGGER')
 
   def emit_event(self, event, arena_id=None):

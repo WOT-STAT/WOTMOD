@@ -1,17 +1,19 @@
+import BigWorld
+import json
 import os
 import shutil
-import json
-import BigWorld
 
-from helpers import getShortClientVersion
 from asyncResponse import get_async
+from helpers import getShortClientVersion
 from ..utils import print_log
+from .exceptionSending import with_exception_sending
 
 
 def num_game_version():
   return getShortClientVersion().split('v.')[1].strip()
 
 
+@with_exception_sending
 def update_game_version(full_mod_name):
   gameVersion = num_game_version()
   currentMod = os.path.join(os.path.abspath('./mods/'), gameVersion, full_mod_name)
@@ -36,6 +38,7 @@ GH_headers = {'X-GitHub-Api-Version': '2022-11-28',
               'Accept': 'application/vnd.github+json'}
 
 
+@with_exception_sending
 def update_mod_version(url, mod_name, current_version, on_start_update=None, on_updated=None, on_success_check=None):
   latest_version = ''
 

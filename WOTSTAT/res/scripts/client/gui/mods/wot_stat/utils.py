@@ -1,5 +1,5 @@
 import BigWorld
-from .serverLogger import send, LEVELS
+from .common.serverLogger import send, LEVELS
 
 
 def print_log(log):

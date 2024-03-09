@@ -1,14 +1,13 @@
-from typing import Optional, Any
-
 import BattleReplay
 import BigWorld
 from PlayerEvents import g_playerEvents
-from ..eventLogger import eventLogger
-from ..sessionStorage import sessionStorage
-from ..events import OnBattleResult
-from ...utils import print_log, print_debug
 from items import vehicles as vehiclesWG
+from ..eventLogger import eventLogger
+from ..events import OnBattleResult
+from ..sessionStorage import sessionStorage
 from ..utils import short_tank_type, setup_dynamic_battle_info, setup_session_meta
+from ...common.exceptionSending import with_exception_sending
+from ...utils import print_log, print_debug
 
 
 class OnBattleResultLogger:
@@ -30,11 +29,13 @@ class OnBattleResultLogger:
     setup_dynamic_battle_info(event)
     self.precreated_battle_result_event[battleEventSession.arenaID] = event
 
+  @with_exception_sending
   def on_battle_results_received(self, isPlayerVehicle, results):
     if not isPlayerVehicle or BattleReplay.isPlaying():
       return
     self.process_battle_result(results)
 
+  @with_exception_sending
   def battle_result_cache_checker(self):
     BigWorld.callback(3, self.battle_result_cache_checker)
 

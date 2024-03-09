@@ -1,33 +1,13 @@
-import BigWorld
-
-from Avatar import PlayerAvatar
 from Account import Account
-from VehicleGunRotator import VehicleGunRotator
-from gui.Scaleform.daapi.view.lobby.battle_queue import BattleQueue
+from Avatar import PlayerAvatar
 from ProjectileMover import ProjectileMover
 from Vehicle import Vehicle
+from VehicleGunRotator import VehicleGunRotator
+from gui.Scaleform.daapi.view.lobby.battle_queue import BattleQueue
 from helpers import dependency
 from skeletons.connection_mgr import IConnectionManager
-from Event import Event
-from debug_utils import LOG_CURRENT_EXCEPTION
-
+from ..common.exceptionSending import SendExceptionEvent
 from ..common.hook import g_overrideLib
-from ..serverLogger import send_current_exception
-
-
-class SafeEvent(Event):
-  __slots__ = ()
-
-  def __init__(self, manager=None):
-    super(SafeEvent, self).__init__(manager)
-
-  def __call__(self, *args, **kwargs):
-    for delegate in self[:]:
-      try:
-        delegate(*args, **kwargs)
-      except:
-        send_current_exception()
-        LOG_CURRENT_EXCEPTION()
 
 
 class WotHookEvents:
@@ -39,29 +19,29 @@ class WotHookEvents:
 
     self.listeners = {}
     # ------------------INIT------------------#
-    self.onConnected = SafeEvent()
-    self.Account_onBecomePlayer = SafeEvent()
-    self.BattleQueue_populate = SafeEvent()
-    self.PlayerAvatar_onEnterWorld = SafeEvent()
-    self.PlayerAvatar_updateTargetingInfo = SafeEvent()
-    self.PlayerAvatar_onArenaPeriodChange = SafeEvent()
+    self.onConnected = SendExceptionEvent()
+    self.Account_onBecomePlayer = SendExceptionEvent()
+    self.BattleQueue_populate = SendExceptionEvent()
+    self.PlayerAvatar_onEnterWorld = SendExceptionEvent()
+    self.PlayerAvatar_updateTargetingInfo = SendExceptionEvent()
+    self.PlayerAvatar_onArenaPeriodChange = SendExceptionEvent()
     # -------------------MOVE------------------#
-    self.VehicleGunRotator_setShotPosition = SafeEvent()
-    self.VehicleGunRotator_updateGunMarker = SafeEvent()
-    self.PlayerAvatar_updateGunMarker = SafeEvent()
+    self.VehicleGunRotator_setShotPosition = SendExceptionEvent()
+    self.VehicleGunRotator_updateGunMarker = SendExceptionEvent()
+    self.PlayerAvatar_updateGunMarker = SendExceptionEvent()
     # -------------------SHOT------------------#
-    self.PlayerAvatar_shoot = SafeEvent()
-    self.PlayerAvatar_showTracer = SafeEvent()
-    self.PlayerAvatar_showShotResults = SafeEvent()
-    self.Vehicle_onHealthChanged = SafeEvent()
-    self.PlayerAvatar_showOwnVehicleHitDirection = SafeEvent()
+    self.PlayerAvatar_shoot = SendExceptionEvent()
+    self.PlayerAvatar_showTracer = SendExceptionEvent()
+    self.PlayerAvatar_showShotResults = SendExceptionEvent()
+    self.Vehicle_onHealthChanged = SendExceptionEvent()
+    self.PlayerAvatar_showOwnVehicleHitDirection = SendExceptionEvent()
     # -------------------EXPLOSION------------------#
-    self.PlayerAvatar_explodeProjectile = SafeEvent()
-    self.Vehicle_showDamageFromShot = SafeEvent()
+    self.PlayerAvatar_explodeProjectile = SendExceptionEvent()
+    self.Vehicle_showDamageFromShot = SendExceptionEvent()
     # -------------------PROJECTILE-------------------#
-    self.ProjectileMover_killProjectile = SafeEvent()
+    self.ProjectileMover_killProjectile = SendExceptionEvent()
     # -------------------HELP-------------------#
-    self.PlayerAvatar_enableServerAim = SafeEvent()
+    self.PlayerAvatar_enableServerAim = SendExceptionEvent()
 
   def __onConnected(self):
     self.onConnected()

@@ -6,6 +6,7 @@ from account_shared import readClientServerVersion
 from constants import ARENA_BONUS_TYPE, ARENA_GAMEPLAY_NAMES, AUTH_REALM
 from gui.battle_control.battle_constants import FEEDBACK_EVENT_ID
 from .sessionStorage import sessionStorage
+from ..common.exceptionSending import with_exception_sending
 from ..load_mod import config
 
 
@@ -43,6 +44,7 @@ def get_tank_type(vehicleTags):
   return res
 
 
+@with_exception_sending
 def setup_dynamic_battle_info(dynamicBattleEvent):
   """
   @type dynamicBattleEvent: DynamicBattleEvent

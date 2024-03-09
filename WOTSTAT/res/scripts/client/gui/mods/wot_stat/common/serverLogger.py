@@ -12,7 +12,7 @@ import excepthook
 from account_shared import readClientServerVersion
 from constants import AUTH_REALM
 from debug_utils import _addTagsToMsg, _makeMsgHeader, LOG_CURRENT_EXCEPTION, _src_file_trim_to, _g_logLock
-from .common.asyncResponse import post_async
+from .asyncResponse import post_async
 
 logger = None  # type: ServerLogger
 modVersion = 'unknown'

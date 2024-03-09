@@ -1,8 +1,9 @@
 import json
-import BigWorld
 
+import BigWorld
 from events import Event, OnBattleStart, OnBattleResult
 from ..common.asyncResponse import post_async
+from ..common.exceptionSending import with_exception_sending
 from ..utils import print_log, print_debug
 
 try:
@@ -64,6 +65,7 @@ class BattleEventSession:
     if self.enable:
       BigWorld.callback(self.send_interval, self.__send_event_loop)
 
+  @with_exception_sending
   def __post_events(self, events, callback=None):
     if events and len(events) > 0:
       data = {

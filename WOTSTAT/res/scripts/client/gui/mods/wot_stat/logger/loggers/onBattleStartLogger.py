@@ -50,6 +50,11 @@ class OnBattleStartLogger:
       return
 
     print_debug("______OnEndLoad______")
+    BigWorld.player().enableServerAim(True)
+
+    if self.battle_loaded:
+      return
+
     self.battle_loaded = True
     self.on_end_load_time = BigWorld.serverTime()
     self.shot_disp_multiplier_factor = shot_disp_multiplier_factor

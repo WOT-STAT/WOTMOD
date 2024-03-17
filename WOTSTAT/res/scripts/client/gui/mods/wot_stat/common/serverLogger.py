@@ -120,17 +120,20 @@ class ServerLogger:
     self.logs_queue.append(Message(level, msg))
 
   def _sending_loop(self):
-    BigWorld.callback(5, self._sending_loop)
+    BigWorld.callback(10, self._sending_loop)
 
     try:
       if len(self.logs_queue) == 0: return
 
-      defaultStreamMeta = {
-        "service": "mod",
-        "playerName": _get_player_name(),
+      defaultStreamLabels = {
+        "source": "mod",
         "region": _get_region(),
-        "gameVersion": _get_game_version(),
         "modVersion": _get_mod_version(),
+      }
+
+      defaultStreamMeta = {
+        "playerName": _get_player_name(),
+        "gameVersion": _get_game_version(),
         "session": self.session_id
       }
 
@@ -141,8 +144,8 @@ class ServerLogger:
         if len(current) == 0: continue
 
         streams.append({
-          "stream": dict(defaultStreamMeta, level=level),
-          "values": map(lambda l: [str(l.time), l.message], current)
+          "stream": dict(defaultStreamLabels, level=level),
+          "values": map(lambda l: [str(l.time), l.message, defaultStreamMeta], current)
         })
 
       data = {"streams": streams}

@@ -6,20 +6,26 @@ from VehicleGunRotator import VehicleGunRotator
 from gui.Scaleform.daapi.view.lobby.battle_queue import BattleQueue
 from helpers import dependency
 from skeletons.connection_mgr import IConnectionManager
+from skeletons.gui.shared.utils import IHangarSpace
 from ..common.exceptionSending import SendExceptionEvent
 from ..common.hook import g_overrideLib
 
 
 class WotHookEvents:
   __connectionMgr = dependency.descriptor(IConnectionManager)
+  __hangarSpace = dependency.descriptor(IHangarSpace)
 
   def __init__(self):
     # DI
     self.__connectionMgr.onConnected += self.__onConnected
+    self.__connectionMgr.onLoggedOn += self.__onLoggedOn
+    self.__hangarSpace.onSpaceCreate += self.__onHangarSpaceCreate
 
     self.listeners = {}
     # ------------------INIT------------------#
     self.onConnected = SendExceptionEvent()
+    self.onLoggedOn = SendExceptionEvent()
+    self.onHangarLoaded = SendExceptionEvent()
     self.Account_onBecomePlayer = SendExceptionEvent()
     self.BattleQueue_populate = SendExceptionEvent()
     self.PlayerAvatar_onEnterWorld = SendExceptionEvent()
@@ -45,6 +51,12 @@ class WotHookEvents:
 
   def __onConnected(self):
     self.onConnected()
+
+  def __onLoggedOn(self, data):
+    self.onLoggedOn(data)
+
+  def __onHangarSpaceCreate(self):
+    self.onHangarLoaded()
 
 
 wotHookEvents = WotHookEvents()

@@ -16,6 +16,7 @@ from .asyncResponse import post_async
 
 logger = None  # type: ServerLogger
 modVersion = 'unknown'
+__logs_queue = []
 
 GAME_VERSION = readClientServerVersion()[1]
 
@@ -24,13 +25,15 @@ def setupLogger(url, version):
   global logger, modVersion
   modVersion = version
   logger = ServerLogger(url)
+  for log in __logs_queue:
+    logger.send(log[0], log[1])
 
 
 def send(level, msg):
   if logger:
     logger.send(level, msg)
   else:
-    print("[WOTSTAT] LOGGER ERROR. Call before init")
+    __logs_queue.append((level, msg))
 
 
 def send_current_exception(tags=None, frame=1):
@@ -44,7 +47,7 @@ def send_current_exception(tags=None, frame=1):
     if extMsg:
       line += '[EXCEPTION]' + _addTagsToMsg(tags, extMsg)
 
-  send(LEVELS.ERROR, line)
+  send(LEVELS.EXCEPTION, line)
 
 
 def withExceptionHandling(l):
@@ -90,9 +93,10 @@ class LEVELS:
   INFO = 'INFO'
   WARN = 'WARN'
   ERROR = 'ERROR'
+  EXCEPTION = 'EXCEPTION'
 
 
-LEVELS_NAMES = [LEVELS.DEBUG, LEVELS.INFO, LEVELS.WARN, LEVELS.ERROR]
+LEVELS_NAMES = [LEVELS.DEBUG, LEVELS.INFO, LEVELS.WARN, LEVELS.ERROR, LEVELS.EXCEPTION]
 
 
 class Message:

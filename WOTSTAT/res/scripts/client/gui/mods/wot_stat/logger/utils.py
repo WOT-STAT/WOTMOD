@@ -3,12 +3,13 @@ import re
 import BigWorld
 from BattleFeedbackCommon import BATTLE_EVENT_TYPE
 from account_shared import readClientServerVersion
-from constants import ARENA_BONUS_TYPE, ARENA_GAMEPLAY_NAMES, AUTH_REALM
+from constants import ARENA_BONUS_TYPE, ARENA_GAMEPLAY_NAMES, AUTH_REALM, ROLE_TYPE_TO_LABEL
 from gui.battle_control.battle_constants import FEEDBACK_EVENT_ID
 from .sessionStorage import sessionStorage
 from ..common.exceptionSending import with_exception_sending
 from ..load_mod import config
 
+from .arenaInfoProvider import ArenaInfoProvider
 
 def vector(t): return {'x': t.x, 'y': t.y, 'z': t.z} if t else None
 
@@ -20,6 +21,8 @@ FEEDBACK_EVENT = dict([(v, k) for k, v in FEEDBACK_EVENT_ID.__dict__.iteritems()
 BATTLE_EVENT = dict([(v, k) for k, v in BATTLE_EVENT_TYPE.__dict__.iteritems() if isinstance(v, int)])
 
 GAME_VERSION = readClientServerVersion()[1]
+
+arenaInfoProvider = ArenaInfoProvider()
 
 
 def short_tank_type(tag):
@@ -42,6 +45,9 @@ def get_tank_type(vehicleTags):
     else 'lightTank' if 'lightTank' in tags \
     else 'None'
   return res
+
+def get_tank_role(role):
+  return ROLE_TYPE_TO_LABEL.get(role, 'None')
 
 
 @with_exception_sending
@@ -68,8 +74,15 @@ def setup_dynamic_battle_info(dynamicBattleEvent):
     team=player.team,
     tankTag=BigWorld.entities[BigWorld.player().playerVehicleID].typeDescriptor.name,
     tankType=short_tank_type(get_tank_type(player.vehicleTypeDescriptor.type.tags)),
+    tankRole=get_tank_role(player.vehicleTypeDescriptor.role),
     tankLevel=player.vehicleTypeDescriptor.level,
-    gunTag=player.vehicleTypeDescriptor.gun.name
+    gunTag=player.vehicleTypeDescriptor.gun.name,
+    allyTeamHealth=arenaInfoProvider.allyTeamHealth[0],
+    enemyTeamHealth=arenaInfoProvider.enemyTeamHealth[0],
+    allyTeamMaxHealth=arenaInfoProvider.allyTeamHealth[1],
+    enemyTeamMaxHealth=arenaInfoProvider.enemyTeamHealth[1],
+    allyTramFragsCount=arenaInfoProvider.allyTeamFragsCount,
+    enemyTeamFragsCount=arenaInfoProvider.enemyTeamFragsCount,
   )
 
 

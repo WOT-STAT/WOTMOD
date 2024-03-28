@@ -7,6 +7,7 @@ from gui.Scaleform.daapi.view.lobby.battle_queue import BattleQueue
 from helpers import dependency
 from skeletons.connection_mgr import IConnectionManager
 from skeletons.gui.shared.utils import IHangarSpace
+
 from ..common.exceptionSending import SendExceptionEvent
 from ..common.hook import g_overrideLib
 
@@ -27,10 +28,13 @@ class WotHookEvents:
     self.onLoggedOn = SendExceptionEvent()
     self.onHangarLoaded = SendExceptionEvent()
     self.Account_onBecomePlayer = SendExceptionEvent()
+    self.Account_onBecomeNonPlayer = SendExceptionEvent()
     self.BattleQueue_populate = SendExceptionEvent()
     self.PlayerAvatar_onEnterWorld = SendExceptionEvent()
     self.PlayerAvatar_updateTargetingInfo = SendExceptionEvent()
     self.PlayerAvatar_onArenaPeriodChange = SendExceptionEvent()
+    self.VehicleGunRotator_start = SendExceptionEvent()
+    self.Vehicle_onEnterWorld = SendExceptionEvent()
     # -------------------MOVE------------------#
     self.VehicleGunRotator_setShotPosition = SendExceptionEvent()
     self.VehicleGunRotator_updateGunMarker = SendExceptionEvent()
@@ -64,9 +68,25 @@ wotHookEvents = WotHookEvents()
 
 # ------------------INIT------------------#
 
+
+@g_overrideLib.registerEvent(Vehicle, 'onEnterWorld')
+def onEnterWorld(self, *a, **k):
+  wotHookEvents.Vehicle_onEnterWorld(self, *a, **k)
+
+
 @g_overrideLib.registerEvent(Account, 'onBecomePlayer')
-def queuePopulate(self, *a, **k):
+def onBecomePlayer(self, *a, **k):
   wotHookEvents.Account_onBecomePlayer(self, *a, **k)
+
+
+@g_overrideLib.registerEvent(Account, 'onBecomeNonPlayer')
+def onBecomeNonPlayer(self, *a, **k):
+  wotHookEvents.Account_onBecomeNonPlayer(self, *a, **k)
+
+
+@g_overrideLib.registerEvent(VehicleGunRotator, 'start')
+def vehicleGunRotator_start(self, *a, **k):
+  wotHookEvents.VehicleGunRotator_start(self, *a, **k)
 
 
 @g_overrideLib.registerEvent(BattleQueue, '_populate')

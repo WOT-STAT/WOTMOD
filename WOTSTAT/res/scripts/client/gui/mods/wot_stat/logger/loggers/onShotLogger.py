@@ -242,7 +242,7 @@ class OnShotLogger:
                              caliber=shot.shell.caliber,
                              piercing_power=shot.piercingPower[0],
                              speed=shot.speed / 0.8,
-                             max_distance=shot.maxDistance,
+                             max_distance=int(shot.maxDistance),
                              shell_descr=shot.shell.compactDescr,
                              ping=BigWorld.LatencyInfo().value[3] - 0.5 * SERVER_TICK_LENGTH,
                              fps=int(BigWorld.getFPS()[1]),
@@ -273,7 +273,7 @@ class OnShotLogger:
   def show_tracer(self, obj, attackerID, shotID, isRicochet, effectsIndex, refStartPoint, refVelocity, gravity, *a,
                   **k):
     player = BigWorld.player()
-    if isRicochet or attackerID != player.playerVehicleID or effectsIndex not in own_effect_index(player):
+    if isRicochet or player is None or attackerID != player.playerVehicleID or effectsIndex not in own_effect_index(player):
       return
 
     shot = abs(shotID)

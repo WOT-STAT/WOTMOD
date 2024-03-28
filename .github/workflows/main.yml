@@ -47,3 +47,8 @@ jobs:
           prerelease: false
           files: WOTSTAT/${{ env.MOD }}
           token: ${{ github.token }}
+          body: |
+
+
+            ----------------------
+            `canary_upgrade=0.0`

@@ -5,7 +5,7 @@ from items import vehicles as vehiclesWG
 from ..eventLogger import eventLogger
 from ..events import OnBattleResult
 from ..sessionStorage import sessionStorage
-from ..utils import short_tank_type, setup_dynamic_battle_info, setup_session_meta
+from ..utils import short_tank_type, get_tank_role, setup_dynamic_battle_info, setup_session_meta
 from ...common.exceptionSending import with_exception_sending
 from ...utils import print_log, print_debug
 
@@ -110,6 +110,7 @@ class OnBattleResultLogger:
           'tankLevel': veWG.level,
           'tankTag': veWG.name,
           'tankType': short_tank_type(veWG.classTag),
+          'tankRole': get_tank_role(veWG.role),
           'maxHealth': vehicle['maxHealth'],
           'health': max(0, vehicle['health']),
           'isAlive': vehicle['health'] > 0
@@ -157,7 +158,7 @@ class OnBattleResultLogger:
       decodeResult['result'] = battle_result
       decodeResult['teamHealth'] = teamHealth
       decodeResult['personal'] = personal
-      decodeResult['playersResults'] = playersResultList
+      decodeResult['playersResults'] = sorted(playersResultList, key=lambda p: p['team'])
       decodeResult['credits'] = avatar['credits']
       decodeResult['originalCredits'] = personalRes['originalCredits']
       decodeResult['duration'] = results['common']['duration']

@@ -1,11 +1,14 @@
 import BigWorld
 import json
+import re
 import os
 import shutil
+import random
+from datetime import datetime
 
 from asyncResponse import get_async
 from helpers import getShortClientVersion
-from ..utils import print_log
+from ..utils import print_log, print_warn, print_error
 from .exceptionSending import with_exception_sending
 
 
@@ -55,15 +58,43 @@ def update_mod_version(url, mod_name, current_version, on_start_update=None, on_
     if on_updated:
       on_updated(latest_version)
 
+  @with_exception_sending
   def end_load_info(res):
     global latest_version
 
     data = json.loads(res)
     latest_version = data['tag_name']
     print_log('detect latest version: ' + latest_version)
+
     if current_version == latest_version:
       if is_latest_version: is_latest_version()
       return
+
+    if 'body' in data and data['body'] \
+        and 'published_at' in data and data['published_at']:
+      body = data['body']
+      published_at = data['published_at']
+
+      match = re.search('`canary_upgrade=(\d+|\d+.\d+)?`', body)
+      num_canary_upgrade = float(match.group(1)) if match else None
+
+      if num_canary_upgrade:
+        parsed_date = datetime.strptime(published_at, "%Y-%m-%dT%H:%M:%SZ")
+        now = datetime.now()
+        delta = now - parsed_date
+        day_since_release = max(delta.days + 1, 1)
+
+        update_fraction_today = 1 - (1 - num_canary_upgrade) ** day_since_release
+        rnd = random.random()
+
+        print_log('Update canary fraction today: %s; RND=%s' % (update_fraction_today, rnd))
+
+        if rnd < update_fraction_today:
+          if is_latest_version: is_latest_version()
+          return
+
+      else:
+        print_error('can not parse canary upgrade')
 
     assets = data['assets']
     asset = filter(lambda x: ('name' in x) and (x['name'] == 'mod.wotStat_' + latest_version + '.wotmod'), assets)

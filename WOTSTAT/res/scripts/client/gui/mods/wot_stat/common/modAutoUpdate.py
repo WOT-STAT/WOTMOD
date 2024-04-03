@@ -89,7 +89,7 @@ def update_mod_version(url, mod_name, current_version, on_start_update=None, on_
 
         print_log('Update canary fraction today: %s; RND=%s' % (update_fraction_today, rnd))
 
-        if rnd < update_fraction_today:
+        if rnd > update_fraction_today:
           if is_latest_version: is_latest_version()
           return
 

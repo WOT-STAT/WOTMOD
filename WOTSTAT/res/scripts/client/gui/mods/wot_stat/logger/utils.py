@@ -11,6 +11,8 @@ from ..load_mod import config
 
 from .arenaInfoProvider import ArenaInfoProvider
 
+from .events import DynamicBattleEvent, SessionMeta, HangarEvent  # noqa: F401
+
 def vector(t): return {'x': t.x, 'y': t.y, 'z': t.z} if t else None
 
 
@@ -52,9 +54,8 @@ def get_tank_role(role):
 
 @with_exception_sending
 def setup_dynamic_battle_info(dynamicBattleEvent):
-  """
-  @type dynamicBattleEvent: DynamicBattleEvent
-  """
+  # type: (DynamicBattleEvent) -> None
+  
   player = BigWorld.player()
   serverName = player.connectionMgr.serverUserName
   if config.get('hideServer'):
@@ -87,7 +88,11 @@ def setup_dynamic_battle_info(dynamicBattleEvent):
 
 
 def setup_session_meta(dynamicBattleEvent):
-  """
-  @type dynamicBattleEvent: SessionMeta
-  """
+  # type: (SessionMeta) -> None
+  
   sessionStorage.setup_session_meta(dynamicBattleEvent)
+
+def setup_hangar_event(hangarEvent):
+  # type: (HangarEvent) -> None
+
+  hangarEvent.setupHangarEvent(BigWorld.player().name)

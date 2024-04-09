@@ -9,6 +9,10 @@ class Event:
     ON_BATTLE_START = 'OnBattleStart'
     ON_SHOT = 'OnShot'
     ON_BATTLE_RESULT = 'OnBattleResult'
+    ON_LOOTBOX_OPEN = 'OnLootboxOpen'
+
+    HANGAR_EVENTS = [ON_LOOTBOX_OPEN]
+    
 
   def __init__(self, event_name):
     self.localtime = get_current_date()
@@ -54,6 +58,16 @@ class BattleEvent(Event):
   def __init__(self, event_name, battleTime):
     Event.__init__(self, event_name)
     self.battleTime = battleTime
+
+
+class HangarEvent(Event):
+  def __init__(self, event_name):
+    Event.__init__(self, event_name)
+
+    self.playerName = None
+
+  def setupHangarEvent(self, playerName):
+    self.playerName = playerName
 
 
 class DynamicBattleEvent(BattleEvent):
@@ -274,5 +288,18 @@ class OnBattleResult(DynamicBattleEvent, SessionMeta):
     self.result = result
 
 
+class OnLootboxOpen(HangarEvent, SessionMeta):
+  def __init__(self, containerTag, openCount, openGroup):
+    HangarEvent.__init__(self, Event.NAMES.ON_LOOTBOX_OPEN)
+    self.containerTag = containerTag
+    self.openCount = openCount
+    self.openGroup = openGroup
+
+
+  def setup(self, raw, parsed):
+    self.raw = raw
+    self.parsed = parsed
+
+    
 def get_current_date():
   return datetime.datetime.now().isoformat()  # TODO: Лучше брать серверное время танков, если такое есть

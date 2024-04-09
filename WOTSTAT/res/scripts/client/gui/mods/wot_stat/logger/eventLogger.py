@@ -1,16 +1,18 @@
-from battleEventSession import BattleEventSession
+import BigWorld
+
+from battleEventSession import BattleEventSession, HangarEventSession
 from constants import ARENA_PERIOD
 from events import Event
-from .utils import *
 from ..common.exceptionSending import SendExceptionEvent
 from ..utils import print_debug
-
+from ..load_mod import config
 
 class EventLogger:
   old_battle_event_sessions = {}
   battle_event_session = None  # type: BattleEventSession
   start_battle_time = 0
   on_session_created = SendExceptionEvent()
+  hangar_event_session = HangarEventSession(config.get('eventURL'))
 
   def __init__(self):
     print_debug('INIT EVENT LOGGER')
@@ -31,6 +33,9 @@ class EventLogger:
 
       if event_session:
         event_session.end_event_session(event)
+
+    elif event.eventName in Event.NAMES.HANGAR_EVENTS:
+      self.hangar_event_session.add_event(event)
 
     else:
       if self.battle_event_session:

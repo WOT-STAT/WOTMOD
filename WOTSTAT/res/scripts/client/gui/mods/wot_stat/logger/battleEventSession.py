@@ -73,3 +73,28 @@ class BattleEventSession:
       }
       print_log(json.dumps(data))
       post_async(self.eventURL, encrypt(json.dumps(data)), callback)
+
+
+class HangarEventSession:
+  def __init__(self, hangar_event_URL, sendInterval=5):
+    self.send_queue = []
+    self.eventURL = hangar_event_URL
+    self.send_interval = sendInterval
+    self.__send_event_loop()
+
+  def add_event(self, event):
+    self.send_queue.append(event)
+
+  def __send_event_loop(self):
+    BigWorld.callback(self.send_interval, self.__send_event_loop)
+    self.__post_events(self.send_queue)
+    self.send_queue = []
+
+  @with_exception_sending
+  def __post_events(self, events, callback=None):
+    if events and len(events) > 0:
+      data = {
+        'events': map(lambda t: t.get_dict(), events)
+      }
+      print_debug(json.dumps(data))
+      post_async(self.eventURL, encrypt(json.dumps(data)), callback)

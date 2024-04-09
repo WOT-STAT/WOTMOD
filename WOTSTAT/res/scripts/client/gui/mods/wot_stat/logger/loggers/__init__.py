@@ -4,3 +4,4 @@ from onBattleResultLogger import onBattleResultLogger
 from onShotLogger import onShotLogger
 from ribbonsLogger import onRibbonsLogger
 from onShotReceiveLogger import onShotReceiveLogger
+from onLootboxLogger import onLootboxLogger

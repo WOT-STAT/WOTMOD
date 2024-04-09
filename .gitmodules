@@ -1,0 +1,7 @@
+[submodule "BigWorldPlaceholder"]
+	path = BigWorldPlaceholder
+	url = https://github.com/SoprachevAK/BigWorldPlaceholder.git
+	branch = main
+[submodule "WorldOfTanks-Decompiled"]
+	path = WorldOfTanks-Decompiled
+	url = https://github.com/StranikS-Scan/WorldOfTanks-Decompiled.git

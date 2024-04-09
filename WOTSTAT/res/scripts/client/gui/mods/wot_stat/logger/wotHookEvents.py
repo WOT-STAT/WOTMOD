@@ -7,6 +7,7 @@ from gui.Scaleform.daapi.view.lobby.battle_queue import BattleQueue
 from helpers import dependency
 from skeletons.connection_mgr import IConnectionManager
 from skeletons.gui.shared.utils import IHangarSpace
+from gui.shared.gui_items.processors.loot_boxes import LootBoxOpenProcessor
 
 from ..common.exceptionSending import SendExceptionEvent
 from ..common.hook import g_overrideLib
@@ -52,6 +53,8 @@ class WotHookEvents:
     self.ProjectileMover_killProjectile = SendExceptionEvent()
     # -------------------HELP-------------------#
     self.PlayerAvatar_enableServerAim = SendExceptionEvent()
+    self.LootBoxOpenProcessorOpenRequest = SendExceptionEvent()
+    self.LootBoxOpenProcessorOpenResponse = SendExceptionEvent()
 
   def __onConnected(self):
     self.onConnected()
@@ -177,3 +180,12 @@ def killProjectile(self, *a, **k):
 @g_overrideLib.registerEvent(PlayerAvatar, 'enableServerAim')
 def enableServerAim(self, *a, **k):
   wotHookEvents.PlayerAvatar_enableServerAim(self, *a, **k)
+
+
+@g_overrideLib.registerEvent(LootBoxOpenProcessor, '_request')
+def LootBoxOpenProcessorOpenRequest(self, *a, **k):
+  wotHookEvents.LootBoxOpenProcessorOpenRequest(self, *a, **k)
+
+@g_overrideLib.registerEvent(LootBoxOpenProcessor, '_successHandler')
+def LootBoxOpenProcessorOpenResponse(self, *a, **k):
+  wotHookEvents.LootBoxOpenProcessorOpenResponse(self, *a, **k)

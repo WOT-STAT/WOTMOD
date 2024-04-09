@@ -1,0 +1,18 @@
+{
+  "git.ignoreLimitWarning": true,
+  "python.autoComplete.extraPaths": [
+    "wot-src/sources/res/scripts/client",
+    "wot-src/sources/res/scripts/common",
+    "wot-src/sources/res/scripts/client_common",
+    "modssettingsapi/sources/scripts/client",
+    "BigWorldPlaceholder",
+  ],
+  "python.analysis.extraPaths": [
+    "wot-src/sources/res/scripts/client",
+    "wot-src/sources/res/scripts/common",
+    "wot-src/sources/res/scripts/client_common",
+    "modssettingsapi/sources/scripts/client",
+    "BigWorldPlaceholder",
+  ],
+  "python.analysis.userFileIndexingLimit": 20000,
+}

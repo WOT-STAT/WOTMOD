@@ -52,20 +52,15 @@
 3. Запустить танки
 4. Готово. Теперь мод будет отправлять события на локальный сервер. Их можно посмотреть в консоле сервера. 
 
+## Редактирование
+Для корректной типизации и подсказок кода, рекоменду в корень проекда докачать следующие репозитории:
 
-## Редактирование через PyCharm
-Для корректной подсветки синтаксиса в IDE необходимы зависимости танков. 
+```bash
+git clone https://github.com/IzeBerg/wot-src.git
+git clone https://github.com/SoprachevAK/BigWorldPlaceholder.git
+```
 
-1. Склонировать репозиторий с подмодулями (`git clone --recursive https://github.com/SoprachevAK/wot-stat.git`)
-   * **WorldOfTanks-Decompiled** - исходный код клиента танков
-   * **BigWorldPlaceholder** - заглушки функций библиотеки движка, объявлены только те, которые были нужны мне
-2. Запустить Zip-Unpacker.exe для исправления регистра названия файлов 
-3. Открыть текущую директорию через PyCharm (*File->Open*)
-4. Отметить следующие папки как корень исходников (*ПКМ -> Mark Directory as -> Sources Root*)
-   * `/WorldOfTanks-Decompiled/source/res/scripts/client`
-   * `/WorldOfTanks-Decompiled/source/res/scripts/common`
-   * `/BigWorldPlaceholder`
-5. Готово. Теперь в IDE будет работать подсветка синтаксиса и подсказка кода.
+При редактировании в `vscode` установите расширение `Ruff`
 
 ## Сборка мода
 1. С помощью [PjOrion](https://koreanrandom.com/forum/topic/15280-) скомпилировать (Run -> Compile py folder)

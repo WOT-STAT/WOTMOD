@@ -1,5 +1,4 @@
 .DS_Store
-.vscode
 .idea
 
 #mod
@@ -12,3 +11,8 @@ node_modules/
 
 crypto.py
 *.wotmod
+
+# wot source
+wot-src/
+modssettingsapi/
+BigWorldPlaceholder/

@@ -78,7 +78,7 @@ def update_mod_version(url, mod_name, current_version, on_start_update=None, on_
       match = re.search('`canary_upgrade=(\d+|\d+.\d+)?`', body)
       num_canary_upgrade = float(match.group(1)) if match else None
 
-      if num_canary_upgrade:
+      if num_canary_upgrade is not None:
         parsed_date = datetime.strptime(published_at, "%Y-%m-%dT%H:%M:%SZ")
         now = datetime.now()
         delta = now - parsed_date

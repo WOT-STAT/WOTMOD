@@ -2,8 +2,7 @@ import re
 
 import BigWorld
 from BattleFeedbackCommon import BATTLE_EVENT_TYPE
-from account_shared import readClientServerVersion
-from constants import ARENA_BONUS_TYPE, ARENA_GAMEPLAY_NAMES, AUTH_REALM, ROLE_TYPE_TO_LABEL
+from constants import ARENA_BONUS_TYPE, ARENA_GAMEPLAY_NAMES, ROLE_TYPE_TO_LABEL
 from gui.battle_control.battle_constants import FEEDBACK_EVENT_ID
 from .sessionStorage import sessionStorage
 from ..common.exceptionSending import with_exception_sending
@@ -22,7 +21,6 @@ ARENA_TAGS = dict(
 FEEDBACK_EVENT = dict([(v, k) for k, v in FEEDBACK_EVENT_ID.__dict__.iteritems() if isinstance(v, int)])
 BATTLE_EVENT = dict([(v, k) for k, v in BATTLE_EVENT_TYPE.__dict__.iteritems() if isinstance(v, int)])
 
-GAME_VERSION = readClientServerVersion()[1]
 
 arenaInfoProvider = ArenaInfoProvider()
 
@@ -69,9 +67,6 @@ def setup_dynamic_battle_info(dynamicBattleEvent):
     battleMode=ARENA_TAGS[player.arena.bonusType],
     battleGameplay=ARENA_GAMEPLAY_NAMES[player.arenaTypeID >> 16],
     serverName=serverName,
-    region=AUTH_REALM,
-    gameVersion=GAME_VERSION,
-    modVersion=config.get('version'),
     team=player.team,
     tankTag=BigWorld.entities[BigWorld.player().playerVehicleID].typeDescriptor.name,
     tankType=short_tank_type(get_tank_type(player.vehicleTypeDescriptor.type.tags)),

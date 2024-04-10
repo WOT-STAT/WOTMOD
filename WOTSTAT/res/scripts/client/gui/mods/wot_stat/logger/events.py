@@ -1,7 +1,13 @@
 # coding=utf-8
-import BigWorld
 
 import datetime
+
+import BigWorld
+from account_shared import readClientServerVersion
+from constants import AUTH_REALM
+from ..load_mod import config
+
+GAME_VERSION = readClientServerVersion()[1]
 
 
 class Event:
@@ -15,8 +21,12 @@ class Event:
     
 
   def __init__(self, event_name):
-    self.localtime = get_current_date()
     self.eventName = event_name
+    self.localtime = get_current_date()
+    self.region = AUTH_REALM
+    self.gameVersion = GAME_VERSION
+    self.modVersion = config.get('version')
+
 
   def get_dict(self):
     return self.__dict__
@@ -80,9 +90,6 @@ class DynamicBattleEvent(BattleEvent):
     self.battleMode = None
     self.battleGameplay = None
     self.serverName = None
-    self.region = None
-    self.gameVersion = None
-    self.modVersion = None
     self.team = None
     self.tankTag = None
     self.tankType = None
@@ -97,7 +104,7 @@ class DynamicBattleEvent(BattleEvent):
     self.enemyTeamFragsCount = None
 
   def setupDynamicBattleInfo(self, arenaTag, playerName, playerClan, accountDBID, battleMode, battleGameplay,
-                             serverName, region, gameVersion, modVersion, team, tankTag, tankType, tankRole, tankLevel,
+                             serverName, team, tankTag, tankType, tankRole, tankLevel,
                              gunTag, allyTeamHealth, enemyTeamHealth, allyTeamMaxHealth, enemyTeamMaxHealth,
                              allyTramFragsCount, enemyTeamFragsCount):
     self.arenaTag = arenaTag
@@ -107,9 +114,6 @@ class DynamicBattleEvent(BattleEvent):
     self.battleMode = battleMode
     self.battleGameplay = battleGameplay
     self.serverName = serverName
-    self.region = region
-    self.gameVersion = gameVersion
-    self.modVersion = modVersion
     self.team = team
     self.tankTag = tankTag
     self.tankType = tankType

@@ -9,7 +9,7 @@ from nations import NAMES as NATIONS_NAMES
 
 from gui.goodies.goodie_items import PersonalVehicleDiscount
 from gui.server_events.awards_formatters import BATTLE_BONUS_X5_TOKEN, CREW_BONUS_X3_TOKEN
-from gui.shared.money import Currency
+from gui.shared.money import Currency, Money
 from gui.shared.utils.requesters.blueprints_requester import getUniqueBlueprints
 from gui.shared.formatters.time_formatters import RentDurationKeys
 from messenger.formatters.service_channel_helpers import getCustomizationItem
@@ -35,6 +35,7 @@ def getVehicleInfos(vehicles):
   addVehNames = []
   removeVehNames = []
   rentedVehNames = []
+  compensatedVehicles = []
 
   def getRentInfo(rentData):
     # type: (dict) -> (str, int)
@@ -50,10 +51,19 @@ def getVehicleInfos(vehicles):
 
   for vehicleDict in vehicles:
     for vehCompDescr, vehData in vehicleDict.iteritems():
-      if 'customCompensation' in vehData:
+      tankTag = vehicles_core.getVehicleType(abs(vehCompDescr)).name
+
+      if b'rentCompensation' in vehData:
+        comp = Money.makeFromMoneyTuple(vehData[b'rentCompensation'])
+        compensatedVehicles.append((tankTag, 'rent', comp.gold))
         continue
 
-      tankTag = vehicles_core.getVehicleType(abs(vehCompDescr)).name
+      if b'customCompensation' in vehData:
+        comp = Money.makeFromMoneyTuple(vehData[b'customCompensation'])
+        compensatedVehicles.append((tankTag, 'normal', comp.gold))
+        continue
+
+
       isNegative = vehCompDescr < 0
       isRented = 'rent' in vehData
 
@@ -66,7 +76,7 @@ def getVehicleInfos(vehicles):
       else:
         addVehNames.append(tankTag)
 
-  return (addVehNames, removeVehNames, rentedVehNames)
+  return (addVehNames, removeVehNames, rentedVehNames, compensatedVehicles)
 
 def getGoodiesString(goodies, itemsCache, goodiesCache):
   # type: (dict, IItemsCache, IGoodiesCache) -> str
@@ -176,9 +186,10 @@ class OnLootboxLogger:
   @with_exception_sending
   def parseVehicles(self, parsed, bonus):
     vehiclesList = bonus.get('vehicles', [])
-    addVehNames, removeVehNames, rentedVehNames = getVehicleInfos(vehiclesList)
+    addVehNames, removeVehNames, rentedVehNames, compensatedVehicles = getVehicleInfos(vehiclesList)
     parsed['addedVehicles'] = addVehNames
     parsed['rentedVehicles'] = rentedVehNames
+    parsed['compensatedVehicles'] = compensatedVehicles
 
   @with_exception_sending
   def parseSlots(self, parsed, bonus):

@@ -77,7 +77,7 @@ def setup_dynamic_battle_info(dynamicBattleEvent):
     enemyTeamHealth=arenaInfoProvider.enemyTeamHealth[0],
     allyTeamMaxHealth=arenaInfoProvider.allyTeamHealth[1],
     enemyTeamMaxHealth=arenaInfoProvider.enemyTeamHealth[1],
-    allyTramFragsCount=arenaInfoProvider.allyTeamFragsCount,
+    allyTeamFragsCount=arenaInfoProvider.allyTeamFragsCount,
     enemyTeamFragsCount=arenaInfoProvider.enemyTeamFragsCount,
   )
 

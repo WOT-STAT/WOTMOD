@@ -100,13 +100,13 @@ class DynamicBattleEvent(BattleEvent):
     self.enemyTeamHealth = None
     self.allyTeamMaxHealth = None
     self.enemyTeamMaxHealth = None
-    self.allyTramFragsCount = None
+    self.allyTeamFragsCount = None
     self.enemyTeamFragsCount = None
 
   def setupDynamicBattleInfo(self, arenaTag, playerName, playerClan, accountDBID, battleMode, battleGameplay,
                              serverName, team, tankTag, tankType, tankRole, tankLevel,
                              gunTag, allyTeamHealth, enemyTeamHealth, allyTeamMaxHealth, enemyTeamMaxHealth,
-                             allyTramFragsCount, enemyTeamFragsCount):
+                             allyTeamFragsCount, enemyTeamFragsCount):
     self.arenaTag = arenaTag
     self.playerName = playerName
     self.playerClan = playerClan
@@ -124,7 +124,7 @@ class DynamicBattleEvent(BattleEvent):
     self.enemyTeamHealth = enemyTeamHealth
     self.allyTeamMaxHealth = allyTeamMaxHealth
     self.enemyTeamMaxHealth = enemyTeamMaxHealth
-    self.allyTramFragsCount = allyTramFragsCount
+    self.allyTeamFragsCount = allyTeamFragsCount
     self.enemyTeamFragsCount = enemyTeamFragsCount
 
 

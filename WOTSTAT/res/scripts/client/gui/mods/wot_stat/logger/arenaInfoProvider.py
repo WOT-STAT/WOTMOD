@@ -92,13 +92,10 @@ class ArenaInfoProvider():
   def tryUpdateVehicle(self, vid, health, maxHealth=None):
     if vid not in self.vehicles:
       player = BigWorld.player()
-      info = player.arena.vehicles[vid] if vid in player.arena.vehicles else None
-      if info is not None:
+      if vid not in player.arena.vehicles:
+        info = player.arena.vehicles[vid]
         self.vehicles[vid] = VehicleInfo(vid, health, maxHealth if maxHealth else info['maxHealth'], info['team'])
-      else:
-        print_warn("TryUpdateVehicle unknown vehicle")
-
-      self.calculateTeamHealth()
+        self.calculateTeamHealth()
     else:
       if self.vehicles[vid].updateHealth(health):
         self.calculateTeamHealth()

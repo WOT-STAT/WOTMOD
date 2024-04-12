@@ -270,8 +270,7 @@ class OnShotLogger:
         player.getOwnVehicleSpeeds()[1] * 180 / math.pi
       ))
 
-  def show_tracer(self, obj, attackerID, shotID, isRicochet, effectsIndex, refStartPoint, refVelocity, gravity, *a,
-                  **k):
+  def show_tracer(self, obj, attackerID, shotID, isRicochet, effectsIndex, refStartPoint, refVelocity, gravity, *a, **k):
     player = BigWorld.player()
     if isRicochet or player is None or attackerID != player.playerVehicleID or effectsIndex not in own_effect_index(player):
       return

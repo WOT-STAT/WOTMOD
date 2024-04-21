@@ -18,11 +18,13 @@ from .logger.wotHookEvents import wotHookEvents
 from .logger.sessionStorage import sessionStorage
 from .common.serverLogger import setupLogger, send
 
+MOD_NAME_PREFIX = 'mod.wotStat'
+
 api_server_time = None
 
 
 def mod_name_version(version):
-  return 'mod.wotStat_' + version + '.wotmod'
+  return MOD_NAME_PREFIX + '_' + version + '.wotmod'
 
 
 def mod_name():
@@ -99,11 +101,15 @@ def init_mod():
     show_notification(t('serverNotResponse'), message_type=SystemMessages.SM_TYPE.ErrorSimple)
 
   get_async(config.get('statusURL'), callback=on_status_check, error_callback=on_status_check_fail)
-  update_game_version(mod_name())
-  update_mod_version(config.get('updateURL'), 'mod.wotStat',
-                     config.get('version'),
-                     on_start_update=lambda version: print_log('Found new mod version ' + version),
-                     on_updated=update_end)
+
+  if not config.get('disableCopyToFuture'):
+    update_game_version(mod_name(), MOD_NAME_PREFIX)
+  
+  if not config.get('disableAutoUpdate'):
+    update_mod_version(config.get('updateURL'), MOD_NAME_PREFIX,
+                       config.get('version'),
+                       on_start_update=lambda version: print_log('Found new mod version ' + version),
+                       on_updated=update_end)
 
   sessionStorage.on_load_mod()
   wotHookEvents.onConnected += on_connected

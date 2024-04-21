@@ -17,7 +17,7 @@ def num_game_version():
 
 
 @with_exception_sending
-def update_game_version(full_mod_name):
+def update_game_version(full_mod_name, mod_name):
   gameVersion = num_game_version()
   currentMod = os.path.join(os.path.abspath('./mods/'), gameVersion, full_mod_name)
 
@@ -25,7 +25,7 @@ def update_game_version(full_mod_name):
     return '.'.join(
       [str(int(c) + 1 if i == y else 0) if i >= y else c for i, c in enumerate(x.split('.'))])
 
-  v = [b(gameVersion, i) for i in range(len(gameVersion.split('.')))]
+  v = [b(gameVersion, i) for i in range(1, len(gameVersion.split('.')))]
 
   absPath = os.path.abspath('./mods/')
   for i in range(len(v)):
@@ -33,12 +33,30 @@ def update_game_version(full_mod_name):
     if not os.path.exists(p):
       os.mkdir(p)
     filePath = os.path.join(p, full_mod_name)
+
+    old_mod_versions = filter(lambda x: x.startswith(mod_name) and x.endswith('.wotmod') and x != full_mod_name, os.listdir(p))
+    for old_mod in old_mod_versions:
+      os.remove(os.path.join(p, old_mod))
+
     if not os.path.exists(filePath):
       shutil.copyfile(currentMod, filePath)
 
+  # TODO: remove this later
+  # remove 2.0.0.0 mods if exists
+  v2Path = os.path.join(absPath, '2.0.0.0')
+  if os.path.exists(v2Path):
+    mods = filter(lambda x: x.startswith(mod_name) and x.endswith('.wotmod'), os.listdir(v2Path))
+    for mod in mods:
+      os.remove(os.path.join(v2Path, mod))
+    if not os.listdir(v2Path):
+      os.rmdir(v2Path)
+      print_log('Remove empty v2.0.0.0 folder')
 
-GH_headers = {'X-GitHub-Api-Version': '2022-11-28',
-              'Accept': 'application/vnd.github+json'}
+
+GH_headers = {
+  'X-GitHub-Api-Version': '2022-11-28',
+  'Accept': 'application/vnd.github+json'
+}
 
 
 @with_exception_sending

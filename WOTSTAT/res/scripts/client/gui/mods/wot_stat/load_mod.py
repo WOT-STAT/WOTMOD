@@ -39,7 +39,7 @@ def on_status_check(res):
     print_log('Server status: %s' % data)
     api_server_time = data['time']
     hello_message()
-  except Exception, e:
+  except Exception as e:
     print_error(e)
     api_server_time = None
 

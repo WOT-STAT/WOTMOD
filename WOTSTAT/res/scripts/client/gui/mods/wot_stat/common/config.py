@@ -45,14 +45,14 @@ class Config:
             message = '''[WotStat] Обнаружена новая конфигурация в файле /mods/configs/wot_stat/config.cfg\n------\n%s''' % config_str
 
             BigWorld.callback(5.0, lambda: show_notification(message, message_type=SystemMessages.SM_TYPE.Warning))
-        except Exception, e:
+        except Exception as e:
           print_log('load config error')
           print_log(e)
 
     try:
       # noinspection PyUnresolvedReferences
-      self.config['version'] = version
-    except Exception, e:
+      self.config['version'] = version # type: ignore # noqa: F821
+    except Exception as e:
       pass
 
   def get(self, key):

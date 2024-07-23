@@ -150,7 +150,7 @@ class OnShotLogger:
                             fireHealth=fire_damage['newHealth'] if fire_damage else None)
 
         if not onShot.accountDBID or not onShot.tracerEnd:
-          print_debug('SHOT IS NOT INIT. ERROR')
+          print_warn('SHOT IS NOT INIT')
           continue
 
         sessionStorage.on_shot(has_damage=len(filter(lambda t: t['damage'] > 0, r['damages'])) != 0,

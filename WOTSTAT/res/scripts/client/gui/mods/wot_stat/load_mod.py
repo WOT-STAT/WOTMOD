@@ -17,6 +17,7 @@ from .utils import print_log, print_error
 from .logger.wotHookEvents import wotHookEvents
 from .logger.sessionStorage import sessionStorage
 from .common.serverLogger import setupLogger, send
+from .thirdParty.FixedBattleResultsCache import setup as setupFixedBattleResultsCache
 
 MOD_NAME_PREFIX = 'mod.wotStat'
 
@@ -114,6 +115,12 @@ def init_mod():
   sessionStorage.on_load_mod()
   wotHookEvents.onConnected += on_connected
   wotHookEvents.onHangarLoaded += on_hangar_loaded_event
+
+  BigWorld.callback(0, injectBattleResultFix)
+
+def injectBattleResultFix():
+  print_log("BattleResultFix: %s" % setupFixedBattleResultsCache())
+
 
 
 send("INFO", 'Mod init')

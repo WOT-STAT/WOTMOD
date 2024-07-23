@@ -2,10 +2,10 @@
 
 import datetime
 
-import BigWorld
-from account_shared import readClientServerVersion
+import BigWorld  
 from constants import AUTH_REALM
 from ..load_mod import config
+from ..common.crossGameUtils import readClientServerVersion
 
 GAME_VERSION = readClientServerVersion()[1]
 

@@ -116,7 +116,6 @@ class OnBattleResultLogger:
           'isAlive': vehicle['health'] > 0
         }
 
-      indexById = {}
       for vehicleId in vehicles:
         vehicle = vehicles[vehicleId][0]
         bdid = vehicle['accountDBID']
@@ -133,8 +132,13 @@ class OnBattleResultLogger:
         }
         res.update(getVehicleInfo(vehicle))
         playersResultList.append(res)
-        indexById[vehicleId] = len(playersResultList)
-
+        
+      playersResultList = sorted(playersResultList, key=lambda p: p['team'])
+      
+      indexById = {}
+      for index in range(len(playersResultList)):
+        indexById[playersResultList[index]['__vehicleId']] = (index + 1)
+        
       for result in playersResultList:
         resultID = result.pop('__vehicleId')
         killerId = vehicles[resultID][0]['killerID']
@@ -158,7 +162,7 @@ class OnBattleResultLogger:
       decodeResult['result'] = battle_result
       decodeResult['teamHealth'] = teamHealth
       decodeResult['personal'] = personal
-      decodeResult['playersResults'] = sorted(playersResultList, key=lambda p: p['team'])
+      decodeResult['playersResults'] = playersResultList
       decodeResult['credits'] = avatar['credits']
       decodeResult['originalCredits'] = personalRes['originalCredits']
       decodeResult['duration'] = results['common']['duration']

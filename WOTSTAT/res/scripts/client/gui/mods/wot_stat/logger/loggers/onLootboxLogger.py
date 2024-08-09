@@ -26,10 +26,11 @@ from ...common.exceptionSending import with_exception_sending
 from ..events import OnLootboxOpen
 from ..eventLogger import eventLogger
 from ..utils import setup_hangar_event, setup_session_meta
+from ...common.crossGameUtils import lootboxKeyPrefix, getLootboxKeyNameByID, getLootboxKeyNameByTokenID
 
 
 ALL_CURRENCIES = [ Currency.CREDITS, Currency.GOLD, Currency.FREE_XP, Currency.CRYSTAL, Currency.EVENT_COIN, Currency.BPCOIN, Currency.EQUIP_COIN ]
-
+LOOTBOX_KEY_PREFIX = lootboxKeyPrefix()
 
 def getVehicleInfos(vehicles):
   addVehNames = []
@@ -117,6 +118,7 @@ class OnLootboxLogger:
   goodiesCache = dependency.descriptor(IGoodiesCache)
 
   lastOpenId = None
+  lastOpenKeyId = None
   lastOpenCount = None
 
   def __init__(self):
@@ -124,6 +126,11 @@ class OnLootboxLogger:
     wotHookEvents.LootBoxOpenProcessorOpenResponse += self.on_response
   
   def on_request(self, obj, *a, **k):
+    self.lastOpenKeyId = 0
+    
+    try: self.lastOpenKeyId = obj._LootBoxOpenProcessor__keyID
+    except AttributeError: pass
+  
     self.lastOpenId = obj._LootBoxOpenProcessor__lootBox.getID()
     self.lastOpenCount = obj._LootBoxOpenProcessor__count
 
@@ -135,10 +142,15 @@ class OnLootboxLogger:
     if self.lastOpenId is None or self.lastOpenCount is None:
       print_warn('OnLootboxLogger.on_response: lastOpenId or lastOpenCount is None')
       return
-     
-    bonuses = ctx.get('bonus', []) # type: List[dict]
 
-    lootboxType = self.itemsCache.items.tokens.getLootBoxByID(self.lastOpenId).getType()
+    bonuses = ctx.get('bonus', []) # type: List[dict]
+    
+    lootboxTag = self.itemsCache.items.tokens.getLootBoxByID(self.lastOpenId).getType()
+    openByTag = lootboxTag
+    
+    if self.lastOpenKeyId is not None and self.lastOpenKeyId != 0:
+      openByTag = getLootboxKeyNameByID(self.lastOpenKeyId)
+      if openByTag is None: openByTag = lootboxTag
 
     unique_bytes = str(time.time()).encode('utf-8') + os.urandom(16)
     groupId = hashlib.md5(unique_bytes).hexdigest()
@@ -161,14 +173,28 @@ class OnLootboxLogger:
       self.parseBlueprints(parsed, bonus)
       self.parseSelectableCrewbook(parsed, bonus)
       self.parseDogtags(parsed, bonus)
-
-      event = OnLootboxOpen(lootboxType, self.lastOpenCount, groupId)
+      
+      event = OnLootboxOpen(lootboxTag, openByTag, not self.isEmptyBonus(bonus), self.lastOpenCount, groupId)
       event.setup(json.dumps(bonus, ensure_ascii=False), parsed)
       setup_session_meta(event)
       setup_hangar_event(event)
 
       eventLogger.emit_event(event)
 
+  @with_exception_sending
+  def isEmptyBonus(self, bonus):
+    if not bonus: return True
+    
+    def checkIsKeyRemove(key, value):
+      if not key.startswith(LOOTBOX_KEY_PREFIX) and not key.startswith(LOOTBOX_TOKEN_PREFIX): return False
+      return value.get('count', 1) <= 0
+    
+    if len(bonus) == 1 and 'tokens' in bonus:
+      tokens = bonus['tokens']
+      if all(checkIsKeyRemove(key, value) for key, value in tokens.items()):
+        return True
+      
+    return False
 
   @with_exception_sending
   def parseCurrency(self, parsed, bonus):
@@ -226,7 +252,7 @@ class OnLootboxLogger:
     parsed['lootboxesTokens'] = []
     parsed['bonusTokens'] = []
     tokens = bonus.get('tokens', {})
-
+    
     for tokenID, tokenData in tokens.iteritems():
       count = tokenData.get('count', 0)
 
@@ -236,9 +262,17 @@ class OnLootboxLogger:
 
         if count != 0:
           parsed['lootboxesTokens'].append((self.itemsCache.items.tokens.getLootBoxByTokenID(tokenID).getType(), count))
+          
+      elif tokenID.startswith(LOOTBOX_KEY_PREFIX):
+        if str(self.lastOpenKeyId) == tokenID.split(':')[1]:
+          count += 1
+          
+        if count != 0:
+          parsed['lootboxesTokens'].append((getLootboxKeyNameByTokenID(tokenID), count))
         
       elif tokenID.startswith(BATTLE_BONUS_X5_TOKEN):
         parsed['bonusTokens'].append(('battle_bonus_x5', count))
+        
       elif tokenID.startswith(CREW_BONUS_X3_TOKEN):
         parsed['bonusTokens'].append(('crew_bonus_x3', count))
 

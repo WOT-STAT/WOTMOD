@@ -293,12 +293,13 @@ class OnBattleResult(DynamicBattleEvent, SessionMeta):
 
 
 class OnLootboxOpen(HangarEvent, SessionMeta):
-  def __init__(self, containerTag, openCount, openGroup):
+  def __init__(self, containerTag, openByTag, isOpenSuccess, openCount, openGroup):
     HangarEvent.__init__(self, Event.NAMES.ON_LOOTBOX_OPEN)
     self.containerTag = containerTag
     self.openCount = openCount
     self.openGroup = openGroup
-
+    self.openByTag = openByTag
+    self.isOpenSuccess = isOpenSuccess
 
   def setup(self, raw, parsed):
     self.raw = raw

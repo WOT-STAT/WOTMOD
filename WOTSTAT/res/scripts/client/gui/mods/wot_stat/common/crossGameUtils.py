@@ -1,4 +1,4 @@
-
+from helpers import dependency
 
 def readClientServerVersion():
   try: 
@@ -24,3 +24,27 @@ def readClientServerVersion():
     
     if AUTH_REALM == 'CT' and prefix == '': prefix = 'ct_'
     return (req, prefix + ver)
+  
+  
+def getLootboxKeyNameByTokenID(tag):
+  try:
+    from skeletons.gui.game_control import IGuiLootBoxesController
+    guiLootbox = dependency.instance(IGuiLootBoxesController) # type: IGuiLootBoxesController
+    return guiLootbox.getKeyByTokenID(tag).userName
+  except Exception:
+    return None
+  
+def getLootboxKeyNameByID(tag):
+  try:
+    from skeletons.gui.game_control import IGuiLootBoxesController
+    guiLootbox = dependency.instance(IGuiLootBoxesController) # type: IGuiLootBoxesController
+    return guiLootbox.getKeyByID(tag).userName
+  except Exception:
+    return None
+  
+def lootboxKeyPrefix():
+  try:
+    from constants import LOOTBOX_KEY_PREFIX
+    return LOOTBOX_KEY_PREFIX
+  except ImportError:
+    return 'lb_key:'

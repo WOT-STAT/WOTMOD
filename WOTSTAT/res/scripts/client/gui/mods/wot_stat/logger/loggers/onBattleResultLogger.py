@@ -178,7 +178,7 @@ class OnBattleResultLogger:
                                       player_bdid=avatar['accountDBID'],
                                       players_results=playersResultList)
 
-    except Exception, e:
+    except Exception as e:
       print_log('cannot decode battle result\n' + str(e))
 
 

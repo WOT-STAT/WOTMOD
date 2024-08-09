@@ -107,7 +107,7 @@ def getGoodiesString(goodies, itemsCache, goodiesCache):
     elif goodieID in itemsCache.items.shop.recertificationForms:
       rf = goodiesCache.getRecertificationForm(goodieID)
       if rf and rf.enabled:
-        equip.append((dk.itemTypeName, ginfo.get('count', 0)))
+        equip.append((rf.itemTypeName, ginfo.get('count', 0)))
 
   return (boosters, discounts, equip)
 

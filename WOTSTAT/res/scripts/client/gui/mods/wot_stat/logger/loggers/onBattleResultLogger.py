@@ -71,6 +71,7 @@ class OnBattleResultLogger:
       teamHealth = [results['common']['teamHealth'][1], results['common']['teamHealth'][2]]
 
       players = results['players']
+      avatars = results['avatars']
       vehicles = results['vehicles']
       playersResultList = list()
 
@@ -113,14 +114,16 @@ class OnBattleResultLogger:
           'tankRole': get_tank_role(veWG.role),
           'maxHealth': vehicle['maxHealth'],
           'health': max(0, vehicle['health']),
-          'isAlive': vehicle['health'] > 0
+          'isAlive': vehicle['health'] > 0,
         }
 
       for vehicleId in vehicles:
         vehicle = vehicles[vehicleId][0]
         bdid = vehicle['accountDBID']
         if bdid not in players: continue
+        if bdid not in avatars: continue
         player = players[bdid]
+        avatar = avatars[bdid]
         squadID = player['prebattleID']
         res = {
           'name': player['realName'],
@@ -128,6 +131,7 @@ class OnBattleResultLogger:
           'bdid': bdid,
           'team': player['team'],
           'xp': vehicle['xp'],
+          'playerRank': avatar['playerRank'],
           '__vehicleId': vehicleId
         }
         res.update(getVehicleInfo(vehicle))
@@ -153,6 +157,7 @@ class OnBattleResultLogger:
         'xp': personalRes['originalXP'],
         'killerIndex': indexById[killerId] if killerId in indexById else -1,
         'squadID': squadStorage[squadID] if squadID in squadStorage else 0,
+        'playerRank': avatar['playerRank'],
       }
 
       personal.update(getVehicleInfo(personalRes))

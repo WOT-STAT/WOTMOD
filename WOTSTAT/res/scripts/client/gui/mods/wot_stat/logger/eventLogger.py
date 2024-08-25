@@ -7,6 +7,8 @@ from ..common.exceptionSending import SendExceptionEvent
 from ..utils import print_debug
 from ..load_mod import config
 
+from ..thirdParty.dataProviderExtension import triggerEvent
+
 class EventLogger:
   old_battle_event_sessions = {}
   battle_event_session = None  # type: BattleEventSession
@@ -41,6 +43,7 @@ class EventLogger:
       if self.battle_event_session:
         self.battle_event_session.add_event(event)
 
+    triggerEvent(event.get_dict())
 
 eventLogger = EventLogger()
 

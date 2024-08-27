@@ -1,6 +1,7 @@
 import BigWorld
 from ..utils import print_log
 from typing import List
+from ..load_mod import config
 
 # typing for intellisense
 class ITrigger(object):
@@ -27,13 +28,18 @@ class IDataProviderSDK(object):
   
   
 onEventTrigger = None # type: ITrigger
+onShotBallisticEventTrigger = None # type: ITrigger
 
 def triggerEvent(event):
   if onEventTrigger:
     onEventTrigger.trigger(event)
+    
+def triggerOnShotBallistic(event):
+  if onShotBallisticEventTrigger:
+    onShotBallisticEventTrigger.trigger(event)
 
 def setupExtension():
-  global onEventTrigger
+  global onEventTrigger, onShotBallisticEventTrigger
   
   if not hasattr(BigWorld, 'wotstat_dataProvider'):
     return
@@ -42,7 +48,9 @@ def setupExtension():
   
   providerVersion = provider.version
   extension = provider.registerExtension('wotstat')
+  extension.createState(['version'], config.get('version'))
   onEventTrigger = extension.createTrigger(['onEvent'])
+  onShotBallisticEventTrigger = extension.createTrigger(['onShotBallisticEvent'])
   
   print_log('Extension setup complete. Data provider version: %s' % str(providerVersion))
 

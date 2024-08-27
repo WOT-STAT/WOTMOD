@@ -6,6 +6,7 @@ from Math import Matrix
 from Vehicle import Vehicle
 from VehicleEffects import DamageFromShotDecoder
 from constants import SERVER_TICK_LENGTH, ATTACK_REASON, ATTACK_REASON_INDICES, ARENA_PERIOD
+from ...thirdParty.dataProviderExtension import triggerOnShotBallistic
 from ..eventLogger import eventLogger, battle_time
 from ..events import OnShot
 from ..sessionStorage import sessionStorage
@@ -280,6 +281,7 @@ class OnShotLogger:
     self.history_tracers.append(shot)
 
     self.temp_shot.set_tracer(shot, vector(refStartPoint), vector(refVelocity), gravity)
+    triggerOnShotBallistic(self.temp_shot.get_dict())
     self.shots[shot] = self.temp_shot
     self.temp_shot = OnShot()
 

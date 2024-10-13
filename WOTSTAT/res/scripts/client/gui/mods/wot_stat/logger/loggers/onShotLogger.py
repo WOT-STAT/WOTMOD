@@ -295,7 +295,7 @@ class OnShotLogger:
       health = vehicle.health if vehicle else None
       shotEventCollector.shot_result(vehicleID, flags, health)
 
-  def on_health_changed(self, obj, newHealth, oldHealth, attackerID, attackReasonID):
+  def on_health_changed(self, obj, newHealth, oldHealth, attackerID, attackReasonID, *a, **k):
     vehicle = BigWorld.player().arena.vehicles[obj.id]
     if attackerID == BigWorld.player().playerVehicleID and (not vehicle or vehicle['team'] != BigWorld.player().team):
       if attackReasonID == ATTACK_REASON_INDICES[ATTACK_REASON.SHOT]:

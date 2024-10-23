@@ -55,6 +55,8 @@ class WotHookEvents:
     self.PlayerAvatar_enableServerAim = SendExceptionEvent()
     self.LootBoxOpenProcessorOpenRequest = SendExceptionEvent()
     self.LootBoxOpenProcessorOpenResponse = SendExceptionEvent()
+    self.LootBoxRerollProcessorOpenRequest = SendExceptionEvent()
+    self.LootBoxRerollProcessorOpenResponse = SendExceptionEvent()
 
   def __onConnected(self):
     self.onConnected()
@@ -189,3 +191,15 @@ def LootBoxOpenProcessorOpenRequest(self, *a, **k):
 @g_overrideLib.registerEvent(LootBoxOpenProcessor, '_successHandler')
 def LootBoxOpenProcessorOpenResponse(self, *a, **k):
   wotHookEvents.LootBoxOpenProcessorOpenResponse(self, *a, **k)
+  
+try:
+  from gui.shared.gui_items.processors.loot_boxes import LootBoxReRollProcessor
+  
+  @g_overrideLib.registerEvent(LootBoxReRollProcessor, '_request')
+  def LootBoxRerollProcessorOpenRequest(self, *a, **k):
+    wotHookEvents.LootBoxRerollProcessorOpenRequest(self, *a, **k) 
+  
+  @g_overrideLib.registerEvent(LootBoxReRollProcessor, '_successHandler')
+  def LootBoxRerollProcessorOpenResponse(self, *a, **k):
+    wotHookEvents.LootBoxRerollProcessorOpenResponse(self, *a, **k) 
+except: pass

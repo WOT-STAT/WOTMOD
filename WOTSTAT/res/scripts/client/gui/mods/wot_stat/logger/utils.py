@@ -91,3 +91,12 @@ def setup_hangar_event(hangarEvent):
   # type: (HangarEvent) -> None
 
   hangarEvent.setupHangarEvent(BigWorld.player().name)
+  
+def get_private_attr(obj, attr):
+  className = obj.__class__.__name__
+  
+  if not className.startswith('_'): className = '_{}'.format(className)
+  
+  target = className + attr
+  if hasattr(obj, target): return getattr(obj, target)
+  return None

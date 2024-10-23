@@ -293,17 +293,19 @@ class OnBattleResult(DynamicBattleEvent, SessionMeta):
 
 
 class OnLootboxOpen(HangarEvent, SessionMeta):
-  def __init__(self, containerTag, openByTag, isOpenSuccess, openCount, openGroup):
+  def __init__(self, containerTag, openByTag, isOpenSuccess, openCount, openGroup, rerollCount):
     HangarEvent.__init__(self, Event.NAMES.ON_LOOTBOX_OPEN)
     self.containerTag = containerTag
     self.openCount = openCount
     self.openGroup = openGroup
     self.openByTag = openByTag
     self.isOpenSuccess = isOpenSuccess
+    self.rerollCount = rerollCount
 
-  def setup(self, raw, parsed):
+  def setup(self, raw, parsed, claimed):
     self.raw = raw
     self.parsed = parsed
+    self.claimed = claimed
 
     
 def get_current_date():

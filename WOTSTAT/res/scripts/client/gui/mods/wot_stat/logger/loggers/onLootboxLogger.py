@@ -21,11 +21,11 @@ from skeletons.gui.goodies import IGoodiesCache
 from items import vehicles as vehicles_core, ITEM_TYPES, tankmen
 
 from ..wotHookEvents import wotHookEvents
-from ...utils import print_warn
+from ...utils import print_log, print_warn
 from ...common.exceptionSending import with_exception_sending
 from ..events import OnLootboxOpen
 from ..eventLogger import eventLogger
-from ..utils import setup_hangar_event, setup_session_meta
+from ..utils import setup_hangar_event, setup_session_meta, get_private_attr
 from ...common.crossGameUtils import lootboxKeyPrefix, getLootboxKeyNameByID, getLootboxKeyNameByTokenID
 
 
@@ -120,19 +120,68 @@ class OnLootboxLogger:
   lastOpenId = None
   lastOpenKeyId = None
   lastOpenCount = None
+  lastRerollCtx = None
+  lastRerollCount = -1
+  lastRerollClaimed = True
 
   def __init__(self):
     wotHookEvents.LootBoxOpenProcessorOpenRequest += self.on_request
     wotHookEvents.LootBoxOpenProcessorOpenResponse += self.on_response
+    wotHookEvents.LootBoxRerollProcessorOpenRequest += self.on_reroll_request
+    wotHookEvents.LootBoxRerollProcessorOpenResponse += self.on_reroll_response
+    
+  def on_reroll_request(self, obj, *a, **k):
+    self.lastOpenKeyId = 0
+    self.lastOpenId = obj._LootBoxReRollProcessor__lootBox.getID()
+    self.lastOpenCount = 1
+    self.lastRerollClaimed = False
   
   def on_request(self, obj, *a, **k):
     self.lastOpenKeyId = 0
+    if self.lastRerollClaimed: self.resetReroll()
     
     try: self.lastOpenKeyId = obj._LootBoxOpenProcessor__keyID
     except AttributeError: pass
   
     self.lastOpenId = obj._LootBoxOpenProcessor__lootBox.getID()
     self.lastOpenCount = obj._LootBoxOpenProcessor__count
+
+  def on_reroll_response(self, obj, code, ctx=None):
+    if ctx is None:
+      print_warn('OnLootboxLogger.on_reroll_response: ctx is None')
+      return
+    
+    rerollCount = ctx.get('reRollCount', 0)
+    if self.lastRerollCount + 1 == rerollCount:
+      print_log("Lootbox.reroll (continue)[{}]".format(rerollCount))
+      if self.lastRerollCtx is not None:
+        self.got_rewards([self.lastRerollCtx.get('rewards', {})], claim=False, rerollCount=self.lastRerollCount)
+    else:
+      print_log("Lootbox.reroll (new)")
+      
+    self.lastRerollCount = rerollCount
+    self.lastRerollCtx = ctx
+    self.lastRerollClaimed = False
+    
+    if self.check_is_auto_claimed(obj, ctx):
+      print_log("Lootbox.reroll (auto-claim)")
+      self.got_rewards([ctx.get('rewards', {})], rerollCount=rerollCount)
+      self.resetReroll()
+        
+  def check_is_auto_claimed(self, obj, ctx):
+    controller = get_private_attr(obj, '__lootBoxesController')
+    boxType = get_private_attr(obj, '__boxType')
+
+    if not controller or not boxType: return False
+    if not hasattr(controller, 'isStopTokenAmongRewardList'): return False
+    
+    try:
+      from white_tiger.gui.game_control.loot_boxes_controller import _preprocessAwards
+      rewards = _preprocessAwards([ctx.get('rewards', {})])
+      return controller.isStopTokenAmongRewardList(rewards, boxType)
+    except: pass
+    
+    return False
 
   def on_response(self, obj, code, ctx=None):
     if ctx is None:
@@ -143,7 +192,16 @@ class OnLootboxLogger:
       print_warn('OnLootboxLogger.on_response: lastOpenId or lastOpenCount is None')
       return
 
-    bonuses = ctx.get('bonus', []) # type: List[dict]
+    print_log("Lootbox.on_response")
+    self.got_rewards(ctx.get('bonus', []), rerollCount=max(self.lastRerollCount, 0))
+    self.resetReroll()
+    
+  @with_exception_sending
+  def got_rewards(self, bonuses, claim=True, rerollCount=0):
+    print_log("GOT REWARD, claim: %s" % str(claim))
+    print(bonuses)
+    
+    if claim: self.lastRerollClaimed = True
     
     lootboxTag = self.itemsCache.items.tokens.getLootBoxByID(self.lastOpenId).getType()
     openByTag = lootboxTag
@@ -174,12 +232,17 @@ class OnLootboxLogger:
       self.parseSelectableCrewbook(parsed, bonus)
       self.parseDogtags(parsed, bonus)
       
-      event = OnLootboxOpen(lootboxTag, openByTag, not self.isEmptyBonus(bonus), self.lastOpenCount, groupId)
-      event.setup(json.dumps(bonus, ensure_ascii=False), parsed)
+      event = OnLootboxOpen(lootboxTag, openByTag, not self.isEmptyBonus(bonus), self.lastOpenCount, groupId, rerollCount)
+      event.setup(json.dumps(bonus, ensure_ascii=False), parsed, claim)
       setup_session_meta(event)
       setup_hangar_event(event)
 
       eventLogger.emit_event(event)
+
+  def resetReroll(self):
+    self.lastRerollCount = -1
+    self.lastRerollCtx = None
+    self.lastRerollClaimed = True
 
   @with_exception_sending
   def isEmptyBonus(self, bonus):

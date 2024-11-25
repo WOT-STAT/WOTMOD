@@ -2,6 +2,7 @@ import hashlib
 import os
 import time
 import json
+import base64
 from typing import List  # noqa: F401
 
 from constants import LOOTBOX_TOKEN_PREFIX, PREMIUM_ENTITLEMENTS
@@ -28,6 +29,27 @@ from ..eventLogger import eventLogger
 from ..utils import setup_hangar_event, setup_session_meta, get_private_attr
 from ...common.crossGameUtils import lootboxKeyPrefix, getLootboxKeyNameByID, getLootboxKeyNameByTokenID
 
+
+def prepareString(obj):
+  if isinstance(obj, str):
+    try:
+      obj.decode('utf-8')
+    except UnicodeDecodeError:
+      return base64.b64encode(obj)
+  return obj
+
+def preprocessData(obj):
+  if isinstance(obj, set):
+    return list(obj)
+  elif isinstance(obj, str):
+    return prepareString(obj)
+  elif isinstance(obj, dict):
+    return { prepareString(str(k)): preprocessData(v) for k, v in obj.items() }
+  elif isinstance(obj, list):
+    return [preprocessData(i) for i in obj]
+  elif isinstance(obj, tuple):
+    return [preprocessData(i) for i in obj]
+  return obj
 
 ALL_CURRENCIES = [ Currency.CREDITS, Currency.GOLD, Currency.FREE_XP, Currency.CRYSTAL, Currency.EVENT_COIN, Currency.BPCOIN, Currency.EQUIP_COIN ]
 LOOTBOX_KEY_PREFIX = lootboxKeyPrefix()
@@ -231,9 +253,10 @@ class OnLootboxLogger:
       self.parseBlueprints(parsed, bonus)
       self.parseSelectableCrewbook(parsed, bonus)
       self.parseDogtags(parsed, bonus)
+      self.parseNewYearToys(parsed, bonus)
       
       event = OnLootboxOpen(lootboxTag, openByTag, not self.isEmptyBonus(bonus), self.lastOpenCount, groupId, rerollCount)
-      event.setup(json.dumps(bonus, ensure_ascii=False), parsed, claim)
+      event.setup(json.dumps(preprocessData(bonus), ensure_ascii=False), parsed, claim)
       setup_session_meta(event)
       setup_hangar_event(event)
 
@@ -314,6 +337,7 @@ class OnLootboxLogger:
   def parseTokens(self, parsed, bonus):
     parsed['lootboxesTokens'] = []
     parsed['bonusTokens'] = []
+    parsed['extraTokens'] = []
     tokens = bonus.get('tokens', {})
     
     for tokenID, tokenData in tokens.iteritems():
@@ -338,6 +362,9 @@ class OnLootboxLogger:
         
       elif tokenID.startswith(CREW_BONUS_X3_TOKEN):
         parsed['bonusTokens'].append(('crew_bonus_x3', count))
+        
+      elif tokenID == 'ny25_mandarin':
+        parsed['extraTokens'].append(('ny25_mandarin', count))
 
   # TODO: Entitlements
   @with_exception_sending
@@ -396,6 +423,25 @@ class OnLootboxLogger:
   def parseDogtags(self, parsed, bonus):
     # dogtags = bonus.get('dogTagComponents', {})
     pass
+  
+  @with_exception_sending
+  def parseNewYearToys(self, parsed, bonus):
+    parsed['toys'] = []
+    
+    toys = bonus.get('ny25Toys', {})
+    for toyID, count in toys.iteritems():
+      parsed['toys'].append(('ny25_' + str(toyID), count))
+      
+    
+    parsed['compensatedToys'] = []
+    for tokenID, tokenValue in bonus.get('tokens', {}).iteritems():
+      if tokenID.startswith('lb_comp:ny25_mandarin:'):
+        amount = int(tokenID.split(':')[2])
+        toy = tokenID.split(':')[3]
+        count = tokenValue['count']
+        parsed['compensatedToys'].append((toy, 'ny25_mandarin', amount * count))
+        
+    print(parsed['compensatedToys'])
 
 
 onLootboxLogger = OnLootboxLogger()
